@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>București · Ghid de magazine</title>
+<meta name="theme-color" content="#09090B">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+  :root{
+    --bg:#09090B;
+    --text:#F5F5F7;
+    --text-2:rgba(245,245,247,.55);
+    --text-3:rgba(245,245,247,.38);
+    --glass:rgba(255,255,255,.045);
+    --glass-2:rgba(255,255,255,.07);
+    --stroke:rgba(255,255,255,.10);
+    --stroke-soft:rgba(255,255,255,.07);
+    --accent:#FF9F0A;            /* amber */
+    --accent-soft:rgba(255,159,10,.22);
+    --danger:#FF453A;
+    --sans:'Geist', -apple-system, 'SF Pro Display', system-ui, 'Segoe UI', sans-serif;
+    --mono:'Geist Mono', ui-monospace, 'SF Mono', Consolas, monospace;
+    --r-lg:24px; --r-md:14px; --r-sm:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  [hidden]{display:none !important;}
+  html,body{height:100%;}
+  body{font-family:var(--sans);color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased;}
+
+  /* mode switching: viewer is default, .editing on <body> reveals the editor */
+  body:not(.editing) .editorOnly{display:none !important;}
+  body.editing .viewerOnly{display:none !important;}
+
+  #app{position:relative;height:100%;}
+  #map{position:absolute;inset:0;z-index:0;
+       background:
+         linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px) 0 0/ 52px 52px,
+         linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px) 0 0/ 52px 52px,
+         #0B0C0E;}
+
+  /* ---------- floating glass panel ---------- */
+  #panel{position:absolute;top:16px;left:16px;bottom:16px;width:388px;z-index:1100;
+    display:flex;flex-direction:column;overflow:hidden;
+    background:rgba(16,16,18,.78);
+    -webkit-backdrop-filter:blur(28px) saturate(1.4);backdrop-filter:blur(28px) saturate(1.4);
+    border:1px solid var(--stroke);border-radius:var(--r-lg);
+    box-shadow:0 24px 60px rgba(0,0,0,.55);}
+  #panel::before{content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+    background:radial-gradient(420px 220px at 50% -60px, rgba(255,159,10,.14), transparent 70%);}
+  #panelScroll{flex:1;overflow-y:auto;position:relative;}
+  #panelScroll::-webkit-scrollbar{width:8px;}
+  #panelScroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:4px;}
+  #panelScroll::-webkit-scrollbar-track{background:transparent;}
+
+  /* ---------- hero with a notch ---------- */
+  .hero{padding:22px 22px 18px;text-align:center;}
+  .notch{display:inline-flex;align-items:center;gap:8px;
+    background:#000;border:1px solid var(--stroke);border-radius:999px;
+    padding:7px 16px;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--text-2);
+    cursor:default;user-select:none;-webkit-user-select:none;}
+  .notchDot{width:6px;height:6px;border-radius:50%;background:var(--accent);
+    box-shadow:0 0 8px 1px var(--accent-soft);}
+  .sub{margin-top:14px;font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.45;color:var(--text);}
+
+  /* ---------- buttons ---------- */
+  button{font-family:var(--sans);cursor:pointer;}
+  .primaryBtn{width:100%;background:#fff;color:#0A0A0C;border:none;border-radius:999px;
+    padding:12px 14px;font-size:14px;font-weight:600;letter-spacing:-0.01em;}
+  .primaryBtn:hover{background:rgba(255,255,255,.86);}
+  .accentBtn{width:100%;background:var(--accent);color:#140D00;border:none;border-radius:999px;
+    padding:12px 14px;font-size:14px;font-weight:600;letter-spacing:-0.01em;
+    box-shadow:0 4px 22px rgba(255,159,10,.25);}
+  .accentBtn:hover{filter:brightness(1.08);}
+  .accentBtn:disabled{opacity:.55;cursor:default;}
+  .lineBtn{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,.18);
+    border-radius:999px;padding:8px 14px;font-size:13px;font-weight:500;}
+  .lineBtn:hover{background:var(--glass-2);}
+  .lineBtn.active{background:var(--accent);border-color:var(--accent);color:#140D00;}
+  .ghostBtn{background:none;border:none;color:var(--text-2);font-size:12px;font-weight:500;
+    text-decoration:underline;text-underline-offset:3px;padding:2px 4px;}
+  .ghostBtn:hover{color:var(--text);}
+  button:focus-visible,input:focus-visible,textarea:focus-visible,li:focus-visible,summary:focus-visible{
+    outline:2px solid var(--accent);outline-offset:2px;}
+
+  /* ---------- form card ---------- */
+  .card{background:var(--glass);border:1px solid var(--stroke-soft);border-radius:18px;
+    margin:0 16px 20px;padding:16px;}
+  .cardHead{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;}
+  .cardHead h2,.indexHead h2{font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text-2);}
+  .field{display:block;margin-bottom:12px;}
+  .field > span,.fieldLabel{display:block;font-size:10.5px;font-weight:500;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--text-3);margin-bottom:6px;}
+  .field em{font-style:normal;text-transform:none;letter-spacing:0;color:rgba(245,245,247,.28);}
+  input,textarea{width:100%;font-family:var(--sans);font-size:14px;color:var(--text);
+    background:rgba(255,255,255,.06);border:1px solid var(--stroke);border-radius:12px;padding:9px 12px;}
+  input::placeholder,textarea::placeholder{color:rgba(245,245,247,.30);}
+  textarea{resize:vertical;line-height:1.5;}
+  input:focus,textarea:focus{border-color:rgba(255,159,10,.6);box-shadow:0 0 0 3px var(--accent-soft);outline:none;}
+  #fLat,#fLng{font-family:var(--mono);font-size:12.5px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .pickRow{display:flex;align-items:center;gap:10px;margin:-2px 0 14px;}
+  .hint{font-size:12px;color:var(--text-3);}
+  .swatches{display:flex;gap:10px;padding-top:2px;}
+  .swatch{width:22px;height:22px;border-radius:50%;border:none;box-shadow:0 0 0 1px rgba(255,255,255,.18);}
+  .swatch[aria-pressed="true"]{box-shadow:0 0 0 2px #0A0A0C, 0 0 0 4px #fff;}
+  .error{font-size:12.5px;color:var(--danger);margin:-4px 0 10px;}
+  #saveBtn{margin-top:6px;}
+
+  /* ---------- places list ---------- */
+  .indexSec{margin:0 16px;}
+  .indexHead{display:flex;align-items:baseline;justify-content:space-between;
+    border-bottom:1px solid var(--stroke-soft);padding-bottom:8px;margin-bottom:12px;}
+  .countBadge{font-family:var(--mono);font-size:11px;color:var(--text-3);}
+  #placeList{list-style:none;}
+  #placeList li{display:flex;align-items:flex-start;gap:11px;background:rgba(255,255,255,.03);
+    border:1px solid var(--stroke-soft);border-radius:14px;padding:11px 13px;margin-bottom:8px;cursor:pointer;}
+  #placeList li:hover{background:rgba(255,255,255,.075);}
+  .liPin{flex:0 0 auto;margin-top:2px;filter:drop-shadow(0 1px 3px rgba(0,0,0,.5));}
+  .liMain{flex:1;min-width:0;}
+  .liName{font-size:14px;font-weight:600;letter-spacing:-0.01em;line-height:1.3;overflow-wrap:anywhere;}
+  .liCoords{display:block;font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:3px;}
+  .liSched{display:block;font-size:12px;color:var(--text-2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .liActions{display:flex;flex-direction:column;gap:2px;align-items:flex-end;}
+  .liActions .ghostBtn{font-size:11px;}
+  .ghostBtn.danger,.popBtn.danger{color:var(--danger);}
+  .emptyState{border:1px dashed rgba(255,255,255,.14);border-radius:14px;padding:16px;
+    font-size:13px;line-height:1.55;color:var(--text-2);}
+  .colophon{font-family:var(--mono);font-size:10px;line-height:1.7;color:var(--text-3);
+    text-align:center;padding:20px 24px 24px;}
+
+  /* ---------- editor bar (bottom of the panel) ---------- */
+  #editorBar{background:rgba(8,8,10,.85);border-top:1px solid var(--stroke);padding:12px 16px 14px;}
+  .ebTop{display:flex;align-items:center;gap:10px;}
+  .ebTag{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;
+    background:var(--accent-soft);color:var(--accent);padding:4px 9px;border-radius:999px;flex:0 0 auto;}
+  #dirtyNote{flex:1;font-size:11.5px;line-height:1.45;color:var(--text-2);}
+  #editorBar .ghostBtn{flex:0 0 auto;}
+  #downloadBtn{margin-top:10px;}
+  #jsonBox{margin-top:10px;font-size:11px;color:var(--text-2);}
+  #jsonBox summary{cursor:pointer;font-family:var(--mono);letter-spacing:.05em;}
+  #jsonBox textarea{margin-top:8px;font-family:var(--mono);font-size:10.5px;line-height:1.55;
+    background:rgba(0,0,0,.45);color:rgba(245,245,247,.85);border:1px solid var(--stroke);}
+
+  /* ---------- map chrome, dark ---------- */
+  .pinIcon{background:none;border:none;filter:drop-shadow(0 3px 5px rgba(0,0,0,.55));}
+  .ghostPin{opacity:.5;}
+  .picking,.picking .leaflet-grab,.picking .leaflet-interactive{cursor:crosshair !important;}
+  .leaflet-container{font-family:var(--sans);background:#0B0C0E;}
+  .leaflet-popup-content-wrapper{background:rgba(20,20,23,.92);
+    -webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);
+    color:var(--text);border:1px solid var(--stroke);border-radius:16px;
+    box-shadow:0 16px 44px rgba(0,0,0,.6);}
+  .leaflet-popup-tip{background:rgba(20,20,23,.92);border:1px solid var(--stroke);}
+  .leaflet-popup-content{margin:15px 17px;line-height:1.5;}
+  .leaflet-popup-close-button{color:var(--text-3) !important;}
+  .popName{font-size:16px;font-weight:600;letter-spacing:-0.015em;line-height:1.3;}
+  .popCoords{font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:3px;}
+  .popLabel{font-size:9.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3);margin:10px 0 2px;}
+  .popText{font-size:13px;color:rgba(245,245,247,.85);}
+  .popActions{display:flex;gap:14px;margin-top:12px;border-top:1px solid var(--stroke-soft);padding-top:10px;}
+  .popBtn{background:none;border:none;padding:0;font-size:12px;font-weight:500;color:var(--text-2);
+    text-decoration:underline;text-underline-offset:3px;}
+  .popBtn:hover{color:var(--accent);}
+  .leaflet-bar{border:1px solid var(--stroke) !important;border-radius:12px !important;overflow:hidden;
+    box-shadow:0 8px 24px rgba(0,0,0,.45) !important;}
+  .leaflet-bar a{background:rgba(20,20,23,.85) !important;color:var(--text) !important;
+    border-bottom:1px solid var(--stroke-soft) !important;
+    -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);}
+  .leaflet-bar a:hover{background:rgba(40,40,45,.9) !important;}
+  .leaflet-bar a.leaflet-disabled{color:var(--text-3) !important;}
+  .leaflet-control-layers{background:rgba(20,20,23,.85) !important;color:var(--text) !important;
+    border:1px solid var(--stroke) !important;border-radius:12px !important;
+    -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+    box-shadow:0 8px 24px rgba(0,0,0,.45) !important;}
+  .leaflet-control-layers-expanded{padding:10px 14px;font-size:13px;}
+  .leaflet-control-layers-toggle{filter:invert(1);}
+  .leaflet-control-attribution{background:rgba(0,0,0,.55) !important;color:rgba(245,245,247,.4) !important;
+    font-size:10px !important;}
+  .leaflet-control-attribution a{color:rgba(245,245,247,.6) !important;}
+  .leaflet-control-scale-line{background:rgba(0,0,0,.45);color:rgba(245,245,247,.6);
+    border-color:rgba(245,245,247,.4);}
+
+  /* notice shown when tile images are blocked (e.g. sandboxed previews) */
+  #tileNotice{position:absolute;right:16px;bottom:16px;left:auto;z-index:1100;max-width:400px;
+    background:rgba(20,20,23,.9);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);
+    border:1px solid var(--stroke);border-radius:16px;box-shadow:0 16px 44px rgba(0,0,0,.6);
+    padding:12px 14px;font-size:12.5px;line-height:1.55;color:var(--text-2);
+    display:flex;gap:12px;align-items:flex-start;}
+  #tileNotice .ghostBtn{flex:0 0 auto;margin-top:-2px;}
+
+  /* ---------- donation modal ---------- */
+  #donateOverlay{position:fixed;inset:0;z-index:3000;display:flex;align-items:center;justify-content:center;padding:20px;
+    background:rgba(0,0,0,.62);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);}
+  #donateCard{position:relative;width:100%;max-width:396px;
+    background:rgba(22,22,25,.92);-webkit-backdrop-filter:blur(30px) saturate(1.4);backdrop-filter:blur(30px) saturate(1.4);
+    border:1px solid var(--stroke);border-radius:var(--r-lg);box-shadow:0 30px 80px rgba(0,0,0,.65);
+    padding:28px 26px 22px;text-align:center;}
+  #donateCard::before{content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+    background:radial-gradient(360px 180px at 50% -40px, rgba(255,159,10,.18), transparent 70%);}
+  .donateX{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--text-3);
+    font-size:24px;line-height:1;padding:2px 8px;border-radius:8px;}
+  .donateX:hover{color:var(--text);background:var(--glass-2);}
+  .donateBadge{position:relative;width:56px;height:56px;margin:4px auto 14px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--accent-soft);box-shadow:0 0 0 1px rgba(255,159,10,.35);}
+  #donateCard h2{position:relative;font-size:21px;font-weight:700;letter-spacing:-0.02em;}
+  .donateText{position:relative;margin:8px auto 20px;max-width:322px;font-size:13.5px;line-height:1.55;color:var(--text-2);}
+  .donateMethod{position:relative;text-align:left;margin-bottom:6px;}
+  .donateLabel{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-3);margin-bottom:6px;}
+  .ibanRow{display:flex;align-items:stretch;gap:8px;}
+  #ibanValue{flex:1;min-width:0;font-family:var(--mono);font-size:12.5px;color:var(--text);
+    background:rgba(255,255,255,.06);border:1px solid var(--stroke);border-radius:12px;
+    padding:11px 12px;display:flex;align-items:center;overflow-x:auto;white-space:nowrap;}
+  .copyBtn{flex:0 0 auto;background:rgba(255,255,255,.1);color:var(--text);border:1px solid var(--stroke);
+    border-radius:12px;padding:0 16px;font-size:13px;font-weight:600;}
+  .copyBtn:hover{background:rgba(255,255,255,.16);}
+  .copyBtn.copied{background:var(--accent);color:#140D00;border-color:var(--accent);}
+  .revolutBtn{position:relative;display:block;margin-top:16px;background:var(--accent);color:#140D00;
+    border-radius:999px;padding:12px 14px;font-size:14px;font-weight:600;text-decoration:none;
+    box-shadow:0 4px 22px rgba(255,159,10,.25);}
+  .revolutBtn:hover{filter:brightness(1.08);}
+  .donateLater{position:relative;margin-top:14px;background:none;border:none;color:var(--text-2);font-size:12.5px;
+    text-decoration:underline;text-underline-offset:3px;}
+  .donateLater:hover{color:var(--text);}
+
+  @media (prefers-reduced-motion: no-preference){
+    .primaryBtn,.accentBtn,.lineBtn,.ghostBtn,.swatch,#placeList li,input,textarea{
+      transition:background-color .16s ease,color .16s ease,box-shadow .16s ease,border-color .16s ease,filter .16s ease;}
+    #panel{animation:panelIn .5s cubic-bezier(.2,.8,.2,1) both;}
+    @keyframes panelIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+    #donateOverlay:not([hidden]){animation:ovFade .25s ease both;}
+    #donateCard{animation:cardPop .35s cubic-bezier(.2,.8,.2,1) both;}
+    @keyframes ovFade{from{opacity:0;}to{opacity:1;}}
+    @keyframes cardPop{from{opacity:0;transform:translateY(12px) scale(.97);}to{opacity:1;transform:none;}}
+  }
+
+  /* ---------- small screens: full map on top, panel as bottom sheet ---------- */
+  @media (max-width:760px){
+    #app{display:flex;flex-direction:column;}
+    #map{position:relative;inset:auto;flex:0 0 46vh;height:46vh;}
+    #panel{position:relative;top:auto;left:auto;bottom:auto;width:auto;flex:1;min-height:0;
+      margin:-20px 10px 0;border-radius:var(--r-lg) var(--r-lg) 0 0;
+      box-shadow:0 -18px 44px rgba(0,0,0,.5);}
+    .hero{padding-top:18px;}
+    #tileNotice{right:12px;left:12px;bottom:12px;max-width:none;}
+  }
+</style>
+</head>
+<body>
+<div id="donateOverlay" hidden>
+  <div id="donateCard" role="dialog" aria-modal="true" aria-labelledby="donateTitle">
+    <button id="donateClose" class="donateX" type="button" aria-label="Închide">×</button>
+    <div class="donateBadge">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="var(--accent)" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+    </div>
+    <h2 id="donateTitle">Susține proiectul</h2>
+    <p class="donateText">Acest ghid e făcut cu drag și ținut la zi gratuit. Dacă ți-a fost de folos, poți lăsa o donație — orice sumă contează. Mulțumesc!</p>
+    <div class="donateMethod">
+      <span class="donateLabel">Transfer bancar · IBAN</span>
+      <div class="ibanRow">
+        <code id="ibanValue">RO95 RNCB 0066 1785 0832 0001</code>
+        <button id="ibanCopy" class="copyBtn" type="button">Copiază</button>
+      </div>
+    </div>
+    <a class="revolutBtn" href="https://revolut.me/davidsiposeavaajuta" target="_blank" rel="noopener">Donează prin Revolut ↗</a>
+    <button id="donateLater" class="donateLater" type="button">Poate mai târziu</button>
+  </div>
+</div>
+<div id="app">
+  <div id="map" role="application" aria-label="Harta Bucureștiului"></div>
+
+  <aside id="panel">
+    <div id="panelScroll">
+      <header class="hero">
+        <div class="notch" id="notchPill"><span class="notchDot"></span><span id="pillCount">0 locuri</span></div>
+        <p class="sub">Salut, aici găsești toate magazinele de care ai nevoie ;)</p>
+      </header>
+
+      <section class="card editorOnly" id="formCard" aria-labelledby="formTitle">
+        <div class="cardHead">
+          <h2 id="formTitle">Adaugă un loc</h2>
+          <button id="cancelEdit" class="ghostBtn" type="button" hidden>Anulează</button>
+        </div>
+
+        <label class="field"><span>Nume</span>
+          <input id="fName" placeholder="Grădina Botanică" autocomplete="off">
+        </label>
+
+        <div class="row2">
+          <label class="field"><span>Latitudine</span>
+            <input id="fLat" inputmode="decimal" placeholder="44.436140" autocomplete="off">
+          </label>
+          <label class="field"><span>Longitudine</span>
+            <input id="fLng" inputmode="decimal" placeholder="26.065290" autocomplete="off">
+          </label>
+        </div>
+
+        <div class="pickRow">
+          <button id="pickBtn" class="lineBtn" type="button">Alege pe hartă</button>
+          <span class="hint">sau lipește coordonatele din Google Maps în câmpul Latitudine — merge oricare format</span>
+        </div>
+
+        <label class="field"><span>Program <em>· opțional</em></span>
+          <textarea id="fSchedule" rows="2" placeholder="Lun–Vin 09:00–18:00&#10;Sâm 10:00–14:00"></textarea>
+        </label>
+
+        <label class="field"><span>Detalii <em>· opțional</em></span>
+          <textarea id="fDetails" rows="3" placeholder="De ce e locul acesta pe hartă…"></textarea>
+        </label>
+
+        <div class="field">
+          <span class="fieldLabel">Culoarea pinului</span>
+          <div id="swatches" class="swatches" role="group" aria-label="Culoarea pinului"></div>
+        </div>
+
+        <p id="formError" class="error" hidden></p>
+        <button id="saveBtn" class="primaryBtn" type="button">Adaugă locul</button>
+      </section>
+
+      <section class="indexSec" aria-labelledby="indexTitle">
+        <div class="indexHead">
+          <h2 id="indexTitle">Locuri</h2>
+          <span id="count" class="countBadge">0 pe hartă</span>
+        </div>
+        <ul id="placeList"></ul>
+        <p class="emptyState viewerOnly" id="emptyViewer" hidden>Încă nu e nimic aici — locurile vor apărea după ce autorul hărții le adaugă.</p>
+        <p class="emptyState editorOnly" id="emptyEditor" hidden>Niciun loc încă. Introdu coordonatele mai sus sau apasă „Alege pe hartă” și dă click unde vrei pinul.</p>
+      </section>
+
+      <footer class="colophon">Hartă de bază © OpenStreetMap contributors · © CARTO</footer>
+    </div>
+
+    <div id="editorBar" class="editorOnly">
+      <div class="ebTop">
+        <span class="ebTag">Editor</span>
+        <span id="dirtyNote">Modificările rămân doar în această pagină până descarci fișierul actualizat.</span>
+        <button id="exitEd" class="ghostBtn" type="button">Ieși</button>
+      </div>
+      <button id="downloadBtn" class="accentBtn" type="button">Descarcă harta actualizată</button>
+      <details id="jsonBox">
+        <summary>Datele locurilor (backup JSON)</summary>
+        <textarea id="jsonArea" rows="6" readonly spellcheck="false"></textarea>
+      </details>
+    </div>
+  </aside>
+</div>
+
+<script type="application/json" id="placesData">
+[
+  {
+    "id": "msp1o3v74jfxj",
+    "name": "Shop&Go",
+    "lat": 44.45752,
+    "lng": 26.077968,
+    "schedule": "",
+    "details": "SE VAND DOAR TIGARI, VAPURI SI ENERGIZANTE!!!\nDepinde de vanzator, dar daca spuneti ca ati mai cumparat de acolo aveti sanse destul de mari sa va lase.",
+    "color": "#FF453A",
+    "createdAt": 1786475974291
+  },
+  {
+    "id": "msp1xjysejiw2",
+    "name": "Omar si prietenii",
+    "lat": 44.452277,
+    "lng": 26.080057,
+    "schedule": "",
+    "details": "Este un loc micut, este fix iniante de niste scaune cu umbrele si fix  dupa un magazin specializat pt vapuri.\nsunt doi vanzatori un domn si o doamna.\nDOAMNA VINDE ORICE, doar nu cumparati prea mult alcool. \nDOMNUL VINDE DOAR TIGARI SI VAPURI\n*cred ca doamna e acolo deobicei in jur de pranza like dupa 1 sau 2*",
+    "color": "#FF9F0A",
+    "createdAt": 1786476415060
+  },
+  {
+    "id": "msp29vb8cakjq",
+    "name": "Tabakos",
+    "lat": 44.44636,
+    "lng": 26.097309,
+    "schedule": "",
+    "details": "vinde absolut orice",
+    "color": "#30D158",
+    "createdAt": 1786476989636
+  },
+  {
+    "id": "msp2ksv33559s",
+    "name": "Tutungerie",
+    "lat": 44.465369,
+    "lng": 26.08809,
+    "schedule": "",
+    "details": "vinde tigari si vapuri de alcool nu stiu",
+    "color": "#BF5AF2",
+    "createdAt": 1786477499679
+  },
+  {
+    "id": "msp2tzq1u88js",
+    "name": "Un chiosc mic",
+    "lat": 44.467342,
+    "lng": 26.08619,
+    "schedule": "",
+    "details": "vinde tigari si energizante, vapuri nustiu daca au sau daca vand",
+    "color": "#64D2FF",
+    "createdAt": 1786477928473
+  },
+  {
+    "id": "msp2z4woqx3j5",
+    "name": "Magazin",
+    "lat": 44.424584,
+    "lng": 26.148633,
+    "schedule": "",
+    "details": "este fix langa un magazin \"la doi pasi\"\nvinde orice",
+    "color": "#30D158",
+    "createdAt": 1786478168473
+  },
+  {
+    "id": "msp32duegeczn",
+    "name": "Magain fix langa statie",
+    "lat": 44.414261,
+    "lng": 26.15219,
+    "schedule": "",
+    "details": "daca cauti pe maps \"magazin mixt statie 102\" iti da exact locatia\nvinde tigari, vapuri de alcool nu stiu",
+    "color": "#FF453A",
+    "createdAt": 1786478320022
+  },
+  {
+    "id": "msp35n0fs5hdi",
+    "name": "Froo",
+    "lat": 44.441372,
+    "lng": 26.157108,
+    "schedule": "",
+    "details": "vinde tigari si vapuri",
+    "color": "#0A84FF",
+    "createdAt": 1786478471871
+  },
+  {
+    "id": "msp3c04ttqrlv",
+    "name": "Afi 1",
+    "lat": 44.43251,
+    "lng": 26.054132,
+    "schedule": "",
+    "details": "vinde vapuri, tigari si energizante\nare un frigider plin cu energizante in fata intrarii",
+    "color": "#FF9F0A",
+    "createdAt": 1786478768813
+  },
+  {
+    "id": "msp47rv35f0lr",
+    "name": "Afi 2",
+    "lat": 44.433583,
+    "lng": 26.054139,
+    "schedule": "",
+    "details": "Scrie ceva costa cofee pe el, n are un nume anume. Sunt mai multi vanzatori: doamna nu da nici macar monster, dar domnul da de toate (fara alcool ca nici nu cred ca au)",
+    "color": "#FF9F0A",
+    "createdAt": 1786480251087
+  }
+]
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+  'use strict';
+
+  /* ---------- state ---------- */
+  var COLORS = ['#FF9F0A','#FF453A','#0A84FF','#30D158','#BF5AF2','#64D2FF'];
+  var places = [];
+  var markers = {};
+  var editingId = null;
+  var pickMode = false;
+  var ghost = null;
+  var selectedColor = COLORS[0];
+  var dirty = false;
+  var tileErrors = 0;
+  var prefersReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var $ = function(id){ return document.getElementById(id); };
+  var el = {
+    notch: $('notchPill'), pill: $('pillCount'),
+    formTitle: $('formTitle'), cancel: $('cancelEdit'),
+    name: $('fName'), lat: $('fLat'), lng: $('fLng'),
+    sched: $('fSchedule'), det: $('fDetails'),
+    swatches: $('swatches'), err: $('formError'), save: $('saveBtn'),
+    pick: $('pickBtn'), list: $('placeList'),
+    emptyViewer: $('emptyViewer'), emptyEditor: $('emptyEditor'),
+    count: $('count'), mapDiv: $('map'), formCard: $('formCard'),
+    dirtyNote: $('dirtyNote'), download: $('downloadBtn'), exit: $('exitEd'),
+    jsonBox: $('jsonBox'), jsonArea: $('jsonArea')
+  };
+
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function roLocuri(n){ return n === 1 ? '1 loc' : n + (n < 20 ? ' locuri' : ' de locuri'); }
+  function isEditing(){ return document.body.classList.contains('editing'); }
+
+  /* ---------- load embedded data ---------- */
+  try{
+    places = JSON.parse($('placesData').textContent.trim() || '[]');
+    if (!Array.isArray(places)) places = [];
+  }catch(e){ places = []; }
+
+  /* ---------- map ---------- */
+  var map = L.map('map', { zoomControl:false }).setView([44.4323, 26.1004], 13);
+  var carto = { subdomains:'abcd', maxZoom:20,
+    attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>' };
+  var darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', carto);
+  var lightLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', carto);
+  var detailLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', carto);
+  darkLayer.addTo(map);
+  L.control.layers({ 'Întunecată':darkLayer, 'Luminoasă':lightLayer, 'Detaliată':detailLayer }, null, { position:'topright' }).addTo(map);
+  L.control.zoom({ position:'bottomright' }).addTo(map);
+  L.control.scale({ imperial:false, position:'bottomright' }).addTo(map);
+  var markerLayer = L.layerGroup().addTo(map);
+
+  /* notice if tile images are blocked (sandboxed previews block outside images) */
+  function onTileError(){
+    tileErrors++;
+    if (tileErrors === 4 && !$('tileNotice')){
+      var n = document.createElement('div');
+      n.id = 'tileNotice';
+      n.innerHTML = '<span>Harta de fundal nu se poate încărca în această previzualizare — mediul blochează imaginile externe. ' +
+                    'Deschide fișierul direct în browser sau publică-l online și vor apărea străzile, clădirile și parcurile.</span>';
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'ghostBtn'; b.textContent = 'Închide';
+      b.addEventListener('click', function(){ n.remove(); });
+      n.appendChild(b);
+      el.mapDiv.appendChild(n);
+    }
+  }
+  darkLayer.on('tileerror', onTileError);
+  lightLayer.on('tileerror', onTileError);
+  detailLayer.on('tileerror', onTileError);
+
+  function pinSVG(color, w, h){
+    return '<svg width="' + w + '" height="' + h + '" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg">' +
+      '<path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="' + color + '" stroke="rgba(255,255,255,.92)" stroke-width="2"/>' +
+      '<circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"/></svg>';
+  }
+  function makeIcon(color, ghostly){
+    return L.divIcon({
+      className: 'pinIcon' + (ghostly ? ' ghostPin' : ''),
+      html: pinSVG(color, 34, 44),
+      iconSize: [34,44], iconAnchor: [17,42], popupAnchor: [0,-36]
+    });
+  }
+  function goTo(latlng, zoom){
+    if (prefersReduce) map.setView(latlng, zoom);
+    else map.flyTo(latlng, zoom, { duration: 0.7 });
+  }
+
+  /* ---------- popup & directions ---------- */
+  function directionsURL(p){
+    return 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(p.lat + ',' + p.lng);
+  }
+  function popupHTML(p){
+    var h = '<div class="popName">' + esc(p.name) + '</div>' +
+            '<div class="popCoords">' + p.lat.toFixed(5) + ', ' + p.lng.toFixed(5) + '</div>';
+    if (p.schedule) h += '<div class="popLabel">Program</div><div class="popText">' + esc(p.schedule).replace(/\n/g,'<br>') + '</div>';
+    if (p.details)  h += '<div class="popLabel">Detalii</div><div class="popText">' + esc(p.details).replace(/\n/g,'<br>') + '</div>';
+    h += '<div class="popActions">' +
+         '<a class="popBtn" href="' + directionsURL(p) + '" target="_blank" rel="noopener">Indicații ↗</a>';
+    if (isEditing()){
+      h += '<button class="popBtn" type="button" onclick="app.edit(\'' + p.id + '\')">Editează</button>' +
+           '<button class="popBtn" type="button" onclick="app.armDelete(this,\'' + p.id + '\')">Șterge</button>';
+    }
+    h += '</div>';
+    return h;
+  }
+
+  /* ---------- rendering ---------- */
+  function renderMarkers(){
+    markerLayer.clearLayers();
+    markers = {};
+    places.forEach(function(p){
+      var m = L.marker([p.lat, p.lng], { icon: makeIcon(p.color) }).addTo(markerLayer);
+      if (isEditing()){
+        m.bindPopup(popupHTML(p), { maxWidth: 280 });
+      } else {
+        /* viewers: clicking a pin goes straight to Google Maps directions */
+        m.on('click', function(){
+          window.open(directionsURL(p), '_blank', 'noopener,noreferrer');
+        });
+      }
+      markers[p.id] = m;
+    });
+  }
+
+  function renderList(){
+    el.list.innerHTML = '';
+    places.forEach(function(p){
+      var li = document.createElement('li');
+      li.tabIndex = 0;
+      li.setAttribute('role','button');
+      li.setAttribute('aria-label','Arată ' + p.name + ' pe hartă');
+      var firstSched = p.schedule ? p.schedule.split('\n')[0] : '';
+      li.innerHTML =
+        '<span class="liPin">' + pinSVG(p.color, 13, 17) + '</span>' +
+        '<span class="liMain"><span class="liName">' + esc(p.name) + '</span>' +
+        '<span class="liCoords">' + p.lat.toFixed(5) + ', ' + p.lng.toFixed(5) + '</span>' +
+        (firstSched ? '<span class="liSched">' + esc(firstSched) + '</span>' : '') +
+        '</span>' +
+        '<span class="liActions viewerOnly">' +
+        '<button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button>' +
+        '</span>' +
+        '<span class="liActions editorOnly">' +
+        '<button class="ghostBtn" type="button" data-act="edit">Editează</button>' +
+        '<button class="ghostBtn" type="button" data-act="del">Șterge</button>' +
+        '</span>';
+      li.addEventListener('click', function(){ focusPlace(p.id); });
+      li.addEventListener('keydown', function(ev){
+        if (ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); focusPlace(p.id); }
+      });
+      li.querySelector('[data-act="dir"]').addEventListener('click', function(ev){
+        ev.stopPropagation(); window.open(directionsURL(p), '_blank', 'noopener,noreferrer');
+      });
+      li.querySelector('[data-act="edit"]').addEventListener('click', function(ev){
+        ev.stopPropagation(); startEdit(p.id);
+      });
+      li.querySelector('[data-act="del"]').addEventListener('click', function(ev){
+        ev.stopPropagation(); armDelete(ev.currentTarget, p.id);
+      });
+      el.list.appendChild(li);
+    });
+    el.count.textContent = places.length + ' pe hartă';
+    el.pill.textContent = roLocuri(places.length);
+    el.emptyViewer.hidden = places.length > 0;
+    el.emptyEditor.hidden = places.length > 0;
+    refreshJsonArea();
+  }
+
+  function renderAll(){ renderList(); renderMarkers(); }
+
+  function focusPlace(id){
+    var p = places.find(function(x){ return x.id === id; });
+    if (!p) return;
+    goTo([p.lat, p.lng], Math.max(map.getZoom(), 16));
+    setTimeout(function(){
+      if (isEditing()){
+        var m = markers[id];
+        if (m) m.openPopup();
+      } else {
+        /* viewers get the info card here; the pin itself links out */
+        L.popup({ maxWidth: 280, offset: [0, -36] })
+          .setLatLng([p.lat, p.lng])
+          .setContent(popupHTML(p))
+          .openOn(map);
+      }
+    }, prefersReduce ? 0 : 450);
+  }
+
+  /* ---------- editor mode (viewer is always the default) ---------- */
+  function setEditing(on){
+    document.body.classList.toggle('editing', on);
+    if (!on){ exitPick(); resetForm(); map.closePopup(); }
+    if (on && places.length === 0){
+      el.dirtyNote.textContent = 'Hartă nouă — adaugă primul loc, apoi descarcă fișierul ca să-l publici.';
+    }
+    renderAll();
+  }
+  window.addEventListener('hashchange', function(){ setEditing(location.hash === '#edit'); });
+
+  el.exit.addEventListener('click', function(){
+    try{
+      if (location.hash === '#edit') history.replaceState(null, '', location.pathname + location.search);
+    }catch(e){}
+    setEditing(false);
+  });
+
+  /* discreet fallback: tap the notch pill five times to toggle the editor
+     (useful in previews where you can't change the URL hash) */
+  var taps = 0, tapTimer = null;
+  el.notch.addEventListener('click', function(){
+    taps++;
+    clearTimeout(tapTimer);
+    tapTimer = setTimeout(function(){ taps = 0; }, 2500);
+    if (taps >= 5){
+      taps = 0;
+      setEditing(!isEditing());
+    }
+  });
+
+  function markDirty(){
+    dirty = true;
+    el.dirtyNote.textContent = 'Modificări nesalvate — descarcă fișierul și înlocuiește-l pe host ca să publici.';
+    refreshJsonArea();
+  }
+  window.addEventListener('beforeunload', function(e){
+    if (dirty && isEditing()){ e.preventDefault(); e.returnValue = ''; }
+  });
+
+  /* ---------- form ---------- */
+  COLORS.forEach(function(c, i){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'swatch';
+    b.style.background = c;
+    b.setAttribute('aria-label', 'Culoare pin ' + (i+1));
+    b.setAttribute('aria-pressed', c === selectedColor ? 'true' : 'false');
+    b.addEventListener('click', function(){ setSwatch(c); });
+    el.swatches.appendChild(b);
+  });
+  function setSwatch(color){
+    selectedColor = COLORS.indexOf(color) >= 0 ? color : COLORS[0];
+    Array.prototype.forEach.call(el.swatches.children, function(s, i){
+      s.setAttribute('aria-pressed', COLORS[i] === selectedColor ? 'true' : 'false');
+    });
+  }
+
+  /* ---------- coordinates: decimal (44.4326) or DMS (44°25'57.5"N) ---------- */
+  function dmsToDec(token){
+    var t = String(token).trim(), hemi = null, m;
+    m = t.match(/^([NSEW])/i);
+    if (m){ hemi = m[1].toUpperCase(); t = t.slice(1).trim(); }
+    m = t.match(/([NSEW])$/i);
+    if (m){ hemi = m[1].toUpperCase(); t = t.slice(0, -1).trim(); }
+    t = t.replace(/''/g, '"').replace(/[″”]/g, '"').replace(/[′’`]/g, "'").replace(/[ºdD]/g, '°');
+    m = t.match(/^(-?\d+(?:[.,]\d+)?)\s*°?\s*(?:(\d+(?:[.,]\d+)?)\s*')?\s*(?:(\d+(?:[.,]\d+)?)\s*"?)?$/);
+    if (!m) return NaN;
+    var num = function(x){ return x == null ? 0 : parseFloat(String(x).replace(',', '.')); };
+    var deg = num(m[1]);
+    var val = Math.abs(deg) + num(m[2]) / 60 + num(m[3]) / 3600;
+    return (deg < 0 || hemi === 'S' || hemi === 'W') ? -val : val;
+  }
+
+  function trySplitPair(str){
+    var s = String(str).trim(), m;
+    m = s.match(/^(-?\d+\.\d+)\s*[,;]\s*(-?\d+\.\d+)$/);                 /* 44.4326, 26.0541 */
+    if (m) return [m[1], m[2]];
+    m = s.match(/^(.*?[NS])\s*[,;]?\s*(.*?[EW])$/i);                     /* 44°25'57.5"N 26°03'14.8"E */
+    if (m && isFinite(dmsToDec(m[1])) && isFinite(dmsToDec(m[2]))) return [m[1], m[2]];
+    m = s.match(/^([NS].*?)\s+[,;]?\s*([EW].*)$/i);                      /* N44°25'57.5" E26°03'14.8" */
+    if (m && isFinite(dmsToDec(m[1])) && isFinite(dmsToDec(m[2]))) return [m[1], m[2]];
+    return null;
+  }
+
+  /* paste a full coordinate pair (either format) into the latitude field */
+  el.lat.addEventListener('input', function(){
+    var pair = trySplitPair(el.lat.value);
+    if (!pair) return;
+    var la = dmsToDec(pair[0]), lo = dmsToDec(pair[1]);
+    if (isFinite(la) && isFinite(lo)){
+      el.lat.value = String(+la.toFixed(6));
+      el.lng.value = String(+lo.toFixed(6));
+    }
+  });
+
+  function parseCoord(v){
+    v = String(v).trim();
+    if (/^-?\d+,\d+$/.test(v)) v = v.replace(',', '.'); /* decimal comma */
+    if (/^[-+]?\d+(\.\d+)?$/.test(v)) return parseFloat(v);
+    var n = dmsToDec(v);
+    return isFinite(n) ? n : NaN;
+  }
+
+  /* tidy a single field into decimal once the user leaves it */
+  function normalizeCoordField(inp){
+    var v = inp.value.trim();
+    if (!v || /^[-+]?\d+(\.\d+)?$/.test(v)) return;
+    var n = parseCoord(v);
+    if (isFinite(n)) inp.value = String(+n.toFixed(6));
+  }
+  el.lat.addEventListener('change', function(){ normalizeCoordField(el.lat); });
+  el.lng.addEventListener('change', function(){ normalizeCoordField(el.lng); });
+
+  function showError(msg){ el.err.textContent = msg; el.err.hidden = false; }
+  function clearError(){ el.err.hidden = true; }
+
+  function clearGhost(){ if (ghost){ map.removeLayer(ghost); ghost = null; } }
+  function setGhost(lat, lng){
+    clearGhost();
+    ghost = L.marker([lat, lng], { icon: makeIcon('#8E8E93', true), interactive:false }).addTo(map);
+  }
+
+  function resetForm(){
+    el.name.value = ''; el.lat.value = ''; el.lng.value = '';
+    el.sched.value = ''; el.det.value = '';
+    setSwatch(COLORS[0]);
+    editingId = null;
+    el.formTitle.textContent = 'Adaugă un loc';
+    el.save.textContent = 'Adaugă locul';
+    el.cancel.hidden = true;
+    clearError();
+    clearGhost();
+  }
+
+  function startEdit(id){
+    var p = places.find(function(x){ return x.id === id; });
+    if (!p) return;
+    editingId = id;
+    el.name.value = p.name;
+    el.lat.value = p.lat;
+    el.lng.value = p.lng;
+    el.sched.value = p.schedule || '';
+    el.det.value = p.details || '';
+    setSwatch(p.color);
+    el.formTitle.textContent = 'Editează locul';
+    el.save.textContent = 'Salvează modificările';
+    el.cancel.hidden = false;
+    clearError();
+    map.closePopup();
+    el.formCard.scrollIntoView({ behavior: prefersReduce ? 'auto' : 'smooth', block: 'start' });
+    el.name.focus();
+  }
+
+  el.cancel.addEventListener('click', resetForm);
+
+  el.save.addEventListener('click', function(){
+    var name = el.name.value.trim();
+    var lat = parseCoord(el.lat.value);
+    var lng = parseCoord(el.lng.value);
+
+    if (!name) return showError('Dă-i un nume locului.');
+    if (isNaN(lat) || lat < -90 || lat > 90) return showError("Latitudinea nu a putut fi citită — folosește 44.4326 sau 44°25'57.5\"N (între −90 și 90).");
+    if (isNaN(lng) || lng < -180 || lng > 180) return showError("Longitudinea nu a putut fi citită — folosește 26.0541 sau 26°03'14.8\"E (între −180 și 180).");
+    clearError();
+
+    var savedId;
+    if (editingId){
+      var p = places.find(function(x){ return x.id === editingId; });
+      if (p){
+        p.name = name; p.lat = lat; p.lng = lng;
+        p.schedule = el.sched.value.trim(); p.details = el.det.value.trim();
+        p.color = selectedColor;
+      }
+      savedId = editingId;
+    } else {
+      savedId = uid();
+      places.push({
+        id: savedId, name: name, lat: lat, lng: lng,
+        schedule: el.sched.value.trim(), details: el.det.value.trim(),
+        color: selectedColor, createdAt: Date.now()
+      });
+    }
+    resetForm();
+    renderAll();
+    markDirty();
+    focusPlace(savedId);
+  });
+
+  /* ---------- pick on map ---------- */
+  function exitPick(){
+    pickMode = false;
+    el.pick.classList.remove('active');
+    el.pick.textContent = 'Alege pe hartă';
+    el.mapDiv.classList.remove('picking');
+  }
+  el.pick.addEventListener('click', function(){
+    if (pickMode) return exitPick();
+    pickMode = true;
+    el.pick.classList.add('active');
+    el.pick.textContent = 'Apasă pe hartă…';
+    el.mapDiv.classList.add('picking');
+  });
+  map.on('click', function(e){
+    if (!pickMode) return;
+    el.lat.value = e.latlng.lat.toFixed(6);
+    el.lng.value = e.latlng.lng.toFixed(6);
+    setGhost(e.latlng.lat, e.latlng.lng);
+    clearError();
+    exitPick();
+  });
+
+  /* ---------- delete (two-step, no dialogs) ---------- */
+  function armDelete(btn, id){
+    if (btn.dataset.armed){ doDelete(id); return; }
+    btn.dataset.armed = '1';
+    var old = btn.textContent;
+    btn.textContent = 'Sigur ștergi?';
+    btn.classList.add('danger');
+    setTimeout(function(){
+      btn.dataset.armed = '';
+      btn.textContent = old;
+      btn.classList.remove('danger');
+    }, 3000);
+  }
+  function doDelete(id){
+    places = places.filter(function(x){ return x.id !== id; });
+    if (editingId === id) resetForm();
+    map.closePopup();
+    renderAll();
+    markDirty();
+  }
+
+  /* popup buttons need globals */
+  window.app = { edit: startEdit, armDelete: armDelete };
+
+  /* ---------- export: rebuild this file with the current places baked in ---------- */
+  function safeJSON(){
+    return JSON.stringify(places, null, 2).replace(/<\//g, '<\\/');
+  }
+  function refreshJsonArea(){
+    if (el.jsonArea) el.jsonArea.value = JSON.stringify(places, null, 2);
+  }
+  el.jsonBox.addEventListener('toggle', refreshJsonArea);
+
+  async function buildExportHTML(){
+    var json = safeJSON();
+    /* preferred: fetch this page's own source and swap the data block */
+    try{
+      var res = await fetch(location.href.split('#')[0], { cache:'no-store' });
+      if (res.ok){
+        var src = await res.text();
+        if (src.indexOf('id="placesData"') !== -1){
+          return src.replace(
+            /(<script type="application\/json" id="placesData">)[\s\S]*?(<\/script>)/,
+            function(m, a, b){ return a + '\n' + json + '\n' + b; }
+          );
+        }
+      }
+    }catch(e){ /* fall through to DOM serialization (e.g. opened from file://) */ }
+
+    var clone = document.cloneNode(true);
+    var d = clone.querySelector('#placesData');
+    if (d) d.textContent = '\n' + json + '\n';
+    var m2 = clone.querySelector('#map');
+    if (m2){ m2.removeAttribute('class'); m2.removeAttribute('style'); m2.innerHTML = ''; }
+    clone.body.classList.remove('editing');
+    var jb = clone.querySelector('#jsonBox'); if (jb) jb.removeAttribute('open');
+    var ja = clone.querySelector('#jsonArea'); if (ja) ja.textContent = '';
+    var tn = clone.querySelector('#tileNotice'); if (tn) tn.remove();
+    var dov = clone.querySelector('#donateOverlay'); if (dov) dov.setAttribute('hidden','');
+    return '<!DOCTYPE html>\n' + clone.documentElement.outerHTML;
+  }
+
+  el.download.addEventListener('click', async function(){
+    el.download.disabled = true;
+    try{
+      var html = await buildExportHTML();
+      var blob = new Blob([html], { type:'text/html' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'index.html';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
+      dirty = false;
+      el.dirtyNote.textContent = 'index.html descărcat — înlocuiește fișierul pe host ca să publici.';
+    }catch(e){
+      el.dirtyNote.textContent = 'Descărcarea nu a mers aici. Copiază backupul JSON de mai jos.';
+      el.jsonBox.open = true;
+      refreshJsonArea();
+    }
+    el.download.disabled = false;
+  });
+
+  /* ---------- donation modal (viewers only) ---------- */
+  function fallbackCopy(text){
+    try{
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      document.execCommand('copy'); ta.remove();
+    }catch(e){}
+  }
+  function setupDonate(){
+    var ov = $('donateOverlay');
+    if (!ov) return null;
+    function hide(){ ov.setAttribute('hidden',''); }
+    function show(){ ov.removeAttribute('hidden'); }
+    var close = $('donateClose'), later = $('donateLater'), copy = $('ibanCopy');
+    if (close) close.addEventListener('click', hide);
+    if (later) later.addEventListener('click', hide);
+    ov.addEventListener('click', function(e){ if (e.target === ov) hide(); });
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && !ov.hasAttribute('hidden')) hide(); });
+    if (copy){
+      copy.addEventListener('click', function(){
+        var iban = 'RO95RNCB0066178508320001';
+        var label = copy.textContent;
+        var done = function(){
+          copy.textContent = 'Copiat!'; copy.classList.add('copied');
+          setTimeout(function(){ copy.textContent = label; copy.classList.remove('copied'); }, 1600);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText(iban).then(done).catch(function(){ fallbackCopy(iban); done(); });
+        } else { fallbackCopy(iban); done(); }
+      });
+    }
+    return { show: show, hide: hide };
+  }
+
+  /* ---------- init ---------- */
+  renderAll();
+  var donate = setupDonate();
+  if (donate && location.hash !== '#edit') donate.show();
+  if (location.hash === '#edit') setEditing(true);
+  if (places.length){
+    var b = L.latLngBounds(places.map(function(p){ return [p.lat, p.lng]; }));
+    map.fitBounds(b.pad(0.25), { maxZoom: 15, animate: false });
+  }
+})();
+</script>
+</body>
+</html>
