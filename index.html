@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="ro"><head>
+<html lang="ro">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>București · Ghid de magazine</title>
 <meta name="theme-color" content="#09090B">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script data-goatcounter="https://davidsiposeavaajuta.goatcounter.com/count"
         async src="//gc.zgo.at/count.js"></script>
@@ -66,6 +67,11 @@
   .notchDot{width:6px;height:6px;border-radius:50%;background:var(--accent);
     box-shadow:0 0 8px 1px var(--accent-soft);}
   .sub{margin-top:14px;font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.45;color:var(--text);}
+  .requestBtn{display:inline-flex;align-items:center;gap:7px;margin-top:16px;
+    background:var(--glass-2);color:var(--text);border:1px solid rgba(255,255,255,.18);
+    border-radius:999px;padding:9px 16px;font-size:13px;font-weight:600;text-decoration:none;}
+  .requestBtn:hover{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.28);}
+  .requestBtn svg{flex:0 0 auto;}
 
   /* ---------- buttons ---------- */
   button{font-family:var(--sans);cursor:pointer;}
@@ -255,12 +261,12 @@
   }
 </style>
 </head>
-<body class="">
-<div id="donateOverlay" hidden="">
+<body>
+<div id="donateOverlay" hidden>
   <div id="donateCard" role="dialog" aria-modal="true" aria-labelledby="donateTitle">
     <button id="donateClose" class="donateX" type="button" aria-label="Închide">×</button>
     <div class="donateBadge">
-      <svg viewBox="0 0 24 24" width="26" height="26" fill="var(--accent)" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="var(--accent)" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
     </div>
     <h2 id="donateTitle">Susține proiectul</h2>
     <p class="donateText">Acest ghid e făcut cu drag și ținut la zi gratuit. Dacă ți-a fost de folos, poți lăsa o donație — orice sumă contează. Mulțumesc!</p>
@@ -276,19 +282,23 @@
   </div>
 </div>
 <div id="app">
-  <div id="map" role="application" aria-label="Harta Bucureștiului" tabindex="0"></div>
+  <div id="map" role="application" aria-label="Harta Bucureștiului"></div>
 
   <aside id="panel">
     <div id="panelScroll">
       <header class="hero">
-        <div class="notch" id="notchPill"><span class="notchDot"></span><span id="pillCount">12 locuri</span></div>
+        <div class="notch" id="notchPill"><span class="notchDot"></span><span id="pillCount">0 locuri</span></div>
         <p class="sub">Salut, aici găsești toate magazinele de care ai nevoie ;)</p>
+        <a class="requestBtn" href="mailto:mihaly.david@icloud.com?subject=Cerere%20magazin%20nou&body=Salut!%20A%C8%99%20vrea%20s%C4%83%20propun%20un%20magazin%20pentru%20hart%C4%83%3A%0A%0ANume%20magazin%3A%20%0Alink%20de%20google%20maps%20cu%20locul%3A%20%0ACe%20vinde%3A%20%0AAlte%20detalii%20(program%2C%20observa%C8%9Bii)%3A%20%0A" aria-label="Fă cerere de magazin prin email">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="m22 6-10 7L2 6"/></svg>
+          Fă cerere de magazin
+        </a>
       </header>
 
       <section class="card editorOnly" id="formCard" aria-labelledby="formTitle">
         <div class="cardHead">
           <h2 id="formTitle">Adaugă un loc</h2>
-          <button id="cancelEdit" class="ghostBtn" type="button" hidden="">Anulează</button>
+          <button id="cancelEdit" class="ghostBtn" type="button" hidden>Anulează</button>
         </div>
 
         <label class="field"><span>Nume</span>
@@ -310,8 +320,7 @@
         </div>
 
         <label class="field"><span>Program <em>· opțional</em></span>
-          <textarea id="fSchedule" rows="2" placeholder="Lun–Vin 09:00–18:00
-Sâm 10:00–14:00"></textarea>
+          <textarea id="fSchedule" rows="2" placeholder="Lun–Vin 09:00–18:00&#10;Sâm 10:00–14:00"></textarea>
         </label>
 
         <label class="field"><span>Detalii <em>· opțional</em></span>
@@ -320,21 +329,21 @@ Sâm 10:00–14:00"></textarea>
 
         <div class="field">
           <span class="fieldLabel">Culoarea pinului</span>
-          <div id="swatches" class="swatches" role="group" aria-label="Culoarea pinului"><button type="button" class="swatch" style="background: rgb(255, 159, 10);" aria-label="Culoare pin 1" aria-pressed="true"></button><button type="button" class="swatch" style="background: rgb(255, 69, 58);" aria-label="Culoare pin 2" aria-pressed="false"></button><button type="button" class="swatch" style="background: rgb(10, 132, 255);" aria-label="Culoare pin 3" aria-pressed="false"></button><button type="button" class="swatch" style="background: rgb(48, 209, 88);" aria-label="Culoare pin 4" aria-pressed="false"></button><button type="button" class="swatch" style="background: rgb(191, 90, 242);" aria-label="Culoare pin 5" aria-pressed="false"></button><button type="button" class="swatch" style="background: rgb(100, 210, 255);" aria-label="Culoare pin 6" aria-pressed="false"></button></div>
+          <div id="swatches" class="swatches" role="group" aria-label="Culoarea pinului"></div>
         </div>
 
-        <p id="formError" class="error" hidden=""></p>
+        <p id="formError" class="error" hidden></p>
         <button id="saveBtn" class="primaryBtn" type="button">Adaugă locul</button>
       </section>
 
       <section class="indexSec" aria-labelledby="indexTitle">
         <div class="indexHead">
           <h2 id="indexTitle">Locuri</h2>
-          <span id="count" class="countBadge">12 pe hartă</span>
+          <span id="count" class="countBadge">0 pe hartă</span>
         </div>
-        <ul id="placeList"><li tabindex="0" role="button" aria-label="Arată Shop&amp;Go pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#FF453A" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">Shop&amp;Go</span><span class="liCoords">44.45752, 26.07797</span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată Omar si prietenii pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#FF9F0A" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">Omar si prietenii</span><span class="liCoords">44.45228, 26.08006</span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată Tabakos pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#30D158" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">Tabakos</span><span class="liCoords">44.44636, 26.09731</span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată Tutungerie pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#BF5AF2" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">Tutungerie</span><span class="liCoords">44.46537, 26.08809</span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată Un chiosc mic pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#64D2FF" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">Un chiosc mic</span><span class="liCoords">44.46734, 26.08619</span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată Magazin pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#30D158" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">Magazin</span><span class="liCoords">44.42458, 26.14863</span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată Magain fix langa statie pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#FF453A" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">Magain fix langa statie</span><span class="liCoords">44.41426, 26.15219</span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată Froo pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#0A84FF" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">Froo</span><span class="liCoords">44.44137, 26.15711</span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată Afi 1 pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#FF9F0A" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">Afi 1</span><span class="liCoords">44.43251, 26.05413</span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată Afi 2 pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#FF9F0A" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">Afi 2</span><span class="liCoords">44.43358, 26.05414</span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată moisil colt pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#0A84FF" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">moisil colt</span><span class="liCoords">44.42796, 26.04213</span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată market taberei/raul doamnei pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#30D158" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">market taberei/raul doamnei</span><span class="liCoords">44.41644, 26.02135</span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li></ul>
-        <p class="emptyState viewerOnly" id="emptyViewer" hidden="">Încă nu e nimic aici — locurile vor apărea după ce autorul hărții le adaugă.</p>
-        <p class="emptyState editorOnly" id="emptyEditor" hidden="">Niciun loc încă. Introdu coordonatele mai sus sau apasă „Alege pe hartă” și dă click unde vrei pinul.</p>
+        <ul id="placeList"></ul>
+        <p class="emptyState viewerOnly" id="emptyViewer" hidden>Încă nu e nimic aici — locurile vor apărea după ce autorul hărții le adaugă.</p>
+        <p class="emptyState editorOnly" id="emptyEditor" hidden>Niciun loc încă. Introdu coordonatele mai sus sau apasă „Alege pe hartă” și dă click unde vrei pinul.</p>
       </section>
 
       <footer class="colophon">Hartă de bază © OpenStreetMap contributors · © CARTO</footer>
@@ -343,13 +352,13 @@ Sâm 10:00–14:00"></textarea>
     <div id="editorBar" class="editorOnly">
       <div class="ebTop">
         <span class="ebTag">Editor</span>
-        <span id="dirtyNote">Modificări nesalvate — descarcă fișierul și înlocuiește-l pe host ca să publici.</span>
+        <span id="dirtyNote">Modificările rămân doar în această pagină până descarci fișierul actualizat.</span>
         <button id="exitEd" class="ghostBtn" type="button">Ieși</button>
       </div>
-      <button id="downloadBtn" class="accentBtn" type="button" disabled="">Descarcă harta actualizată</button>
+      <button id="downloadBtn" class="accentBtn" type="button">Descarcă harta actualizată</button>
       <details id="jsonBox">
         <summary>Datele locurilor (backup JSON)</summary>
-        <textarea id="jsonArea" rows="6" readonly="" spellcheck="false"></textarea>
+        <textarea id="jsonArea" rows="6" readonly spellcheck="false"></textarea>
       </details>
     </div>
   </aside>
@@ -1003,6 +1012,5 @@ Sâm 10:00–14:00"></textarea>
   }
 })();
 </script>
-
-
-</body></html>
+</body>
+</html>
