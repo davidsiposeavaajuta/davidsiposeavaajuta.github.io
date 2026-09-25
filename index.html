@@ -1,32 +1,38 @@
 <!DOCTYPE html>
-<html lang="ro">
-<head>
+<html lang="ro"><head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>lista de specialitati</title>
 <meta name="theme-color" content="#09090B">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<script data-goatcounter="https://davidsiposeavaajuta.goatcounter.com/count"
-        async src="//gc.zgo.at/count.js"></script>
+<script data-goatcounter="https://davidsiposeavaajuta.goatcounter.com/count" async="" src="//gc.zgo.at/count.js"></script>
 <style>
   :root{
     --bg:#09090B;
     --text:#F5F5F7;
-    --text-2:rgba(245,245,247,.55);
-    --text-3:rgba(245,245,247,.38);
-    --glass:rgba(255,255,255,.045);
-    --glass-2:rgba(255,255,255,.07);
-    --stroke:rgba(255,255,255,.10);
+    --text-2:rgba(245,245,247,.6);
+    --text-3:rgba(245,245,247,.4);
+    --glass:rgba(255,255,255,.05);
+    --glass-2:rgba(255,255,255,.09);
+    --stroke:rgba(255,255,255,.12);
     --stroke-soft:rgba(255,255,255,.07);
     --accent:#FF9F0A;            /* amber */
     --accent-soft:rgba(255,159,10,.22);
     --danger:#FF453A;
     --sans:'Geist', -apple-system, 'SF Pro Display', system-ui, 'Segoe UI', sans-serif;
     --mono:'Geist Mono', ui-monospace, 'SF Mono', Consolas, monospace;
-    --r-lg:24px; --r-md:14px; --r-sm:10px;
+    --r-lg:26px; --r-md:16px; --r-sm:11px;
+    /* Liquid Glass surface kit */
+    --glass-blur:blur(32px) saturate(1.9);
+    --glass-body:rgba(24,24,28,.55);
+    --glass-body-strong:rgba(18,18,22,.72);
+    --glass-edge:rgba(255,255,255,.14);
+    --glass-sheen:linear-gradient(180deg, rgba(255,255,255,.11), rgba(255,255,255,.015) 44%);
+    --glass-rim:inset 0 1px 0 rgba(255,255,255,.34), inset 0 0 0 1px rgba(255,255,255,.03);
+    --glass-drop:0 24px 60px rgba(0,0,0,.55);
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   [hidden]{display:none !important;}
@@ -45,48 +51,58 @@
          #0B0C0E;}
 
   /* ---------- floating glass panel ---------- */
-  #panel{position:absolute;top:16px;left:16px;bottom:16px;width:388px;z-index:1100;
+  #panel{position:absolute;top:16px;left:16px;bottom:16px;width:392px;z-index:1100;
     display:flex;flex-direction:column;overflow:hidden;
-    background:rgba(16,16,18,.78);
-    -webkit-backdrop-filter:blur(28px) saturate(1.4);backdrop-filter:blur(28px) saturate(1.4);
-    border:1px solid var(--stroke);border-radius:var(--r-lg);
-    box-shadow:0 24px 60px rgba(0,0,0,.55);}
+    background:var(--glass-sheen), var(--glass-body);
+    -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+    border:1px solid var(--glass-edge);border-radius:var(--r-lg);
+    box-shadow:var(--glass-drop), var(--glass-rim);}
   #panel::before{content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;
-    background:radial-gradient(420px 220px at 50% -60px, rgba(255,159,10,.14), transparent 70%);}
-  #panelScroll{flex:1;overflow-y:auto;position:relative;}
+    background:radial-gradient(460px 240px at 50% -80px, rgba(255,159,10,.13), transparent 72%);}
+  #panelScroll{flex:1;overflow-y:auto;position:relative;-webkit-overflow-scrolling:touch;}
   #panelScroll::-webkit-scrollbar{width:8px;}
-  #panelScroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:4px;}
+  #panelScroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:4px;}
   #panelScroll::-webkit-scrollbar-track{background:transparent;}
+
+  /* grab handle for the mobile bottom sheet (hidden on desktop) */
+  .sheetHandle{display:none;}
+  .sheetChevron{display:none;}
 
   /* ---------- hero with a notch ---------- */
   .hero{padding:22px 22px 18px;text-align:center;}
   .notch{display:inline-flex;align-items:center;gap:8px;
-    background:#000;border:1px solid var(--stroke);border-radius:999px;
+    background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.02)), rgba(0,0,0,.55);
+    border:1px solid var(--glass-edge);border-radius:999px;
+    box-shadow:var(--glass-rim);
     padding:7px 16px;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--text-2);
     cursor:default;user-select:none;-webkit-user-select:none;}
   .notchDot{width:6px;height:6px;border-radius:50%;background:var(--accent);
     box-shadow:0 0 8px 1px var(--accent-soft);}
   .sub{margin-top:14px;font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.45;color:var(--text);}
   .requestBtn{display:inline-flex;align-items:center;gap:7px;margin-top:16px;
-    background:var(--glass-2);color:var(--text);border:1px solid rgba(255,255,255,.18);
-    border-radius:999px;padding:9px 16px;font-size:13px;font-weight:600;text-decoration:none;}
-  .requestBtn:hover{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.28);}
+    background:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.04)), var(--glass-2);
+    color:var(--text);border:1px solid var(--glass-edge);
+    box-shadow:var(--glass-rim);
+    border-radius:999px;padding:10px 17px;font-size:13px;font-weight:600;text-decoration:none;}
+  .requestBtn:hover{background:linear-gradient(180deg, rgba(255,255,255,.2), rgba(255,255,255,.06)), rgba(255,255,255,.14);border-color:rgba(255,255,255,.3);}
   .requestBtn svg{flex:0 0 auto;}
 
   /* ---------- buttons ---------- */
   button{font-family:var(--sans);cursor:pointer;}
   .primaryBtn{width:100%;background:#fff;color:#0A0A0C;border:none;border-radius:999px;
-    padding:12px 14px;font-size:14px;font-weight:600;letter-spacing:-0.01em;}
-  .primaryBtn:hover{background:rgba(255,255,255,.86);}
-  .accentBtn{width:100%;background:var(--accent);color:#140D00;border:none;border-radius:999px;
     padding:12px 14px;font-size:14px;font-weight:600;letter-spacing:-0.01em;
-    box-shadow:0 4px 22px rgba(255,159,10,.25);}
-  .accentBtn:hover{filter:brightness(1.08);}
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 6px 18px rgba(0,0,0,.3);}
+  .primaryBtn:hover{background:rgba(255,255,255,.9);}
+  .accentBtn{width:100%;background:linear-gradient(180deg, #FFB43D, var(--accent));color:#140D00;border:none;border-radius:999px;
+    padding:12px 14px;font-size:14px;font-weight:600;letter-spacing:-0.01em;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.45), 0 6px 22px rgba(255,159,10,.32);}
+  .accentBtn:hover{filter:brightness(1.06);}
   .accentBtn:disabled{opacity:.55;cursor:default;}
-  .lineBtn{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,.18);
-    border-radius:999px;padding:8px 14px;font-size:13px;font-weight:500;}
-  .lineBtn:hover{background:var(--glass-2);}
-  .lineBtn.active{background:var(--accent);border-color:var(--accent);color:#140D00;}
+  .lineBtn{background:linear-gradient(180deg, rgba(255,255,255,.1), rgba(255,255,255,.02)), rgba(255,255,255,.02);
+    color:var(--text);border:1px solid var(--glass-edge);box-shadow:var(--glass-rim);
+    border-radius:999px;padding:9px 15px;font-size:13px;font-weight:500;}
+  .lineBtn:hover{background:linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.04)), var(--glass-2);}
+  .lineBtn.active{background:linear-gradient(180deg, #FFB43D, var(--accent));border-color:transparent;color:#140D00;box-shadow:inset 0 1px 0 rgba(255,255,255,.4);}
   .ghostBtn{background:none;border:none;color:var(--text-2);font-size:12px;font-weight:500;
     text-decoration:underline;text-underline-offset:3px;padding:2px 4px;}
   .ghostBtn:hover{color:var(--text);}
@@ -157,11 +173,13 @@
   .ghostPin{opacity:.5;}
   .picking,.picking .leaflet-grab,.picking .leaflet-interactive{cursor:crosshair !important;}
   .leaflet-container{font-family:var(--sans);background:#0B0C0E;}
-  .leaflet-popup-content-wrapper{background:rgba(20,20,23,.92);
-    -webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);
-    color:var(--text);border:1px solid var(--stroke);border-radius:16px;
-    box-shadow:0 16px 44px rgba(0,0,0,.6);}
-  .leaflet-popup-tip{background:rgba(20,20,23,.92);border:1px solid var(--stroke);}
+  .osm-dark{filter:invert(1) hue-rotate(180deg) brightness(.92) contrast(.9);}
+  .maplibregl-canvas{outline:none;}
+  .leaflet-popup-content-wrapper{background:var(--glass-sheen), var(--glass-body-strong);
+    -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+    color:var(--text);border:1px solid var(--glass-edge);border-radius:20px;
+    box-shadow:0 16px 44px rgba(0,0,0,.6), var(--glass-rim);}
+  .leaflet-popup-tip{background:var(--glass-body-strong);border:1px solid var(--glass-edge);}
   .leaflet-popup-content{margin:15px 17px;line-height:1.5;}
   .leaflet-popup-close-button{color:var(--text-3) !important;}
   .popName{font-size:16px;font-weight:600;letter-spacing:-0.015em;line-height:1.3;}
@@ -202,19 +220,38 @@
     @keyframes userPulse{0%{transform:translate(-50%,-50%) scale(1);opacity:.6;}
       100%{transform:translate(-50%,-50%) scale(3.4);opacity:0;}}
   }
-  .leaflet-bar{border:1px solid var(--stroke) !important;border-radius:12px !important;overflow:hidden;
-    box-shadow:0 8px 24px rgba(0,0,0,.45) !important;}
-  .leaflet-bar a{background:rgba(20,20,23,.85) !important;color:var(--text) !important;
-    border-bottom:1px solid var(--stroke-soft) !important;
-    -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);}
-  .leaflet-bar a:hover{background:rgba(40,40,45,.9) !important;}
+  .leaflet-bar{border:1px solid var(--glass-edge) !important;border-radius:14px !important;overflow:hidden;
+    box-shadow:0 8px 24px rgba(0,0,0,.45), var(--glass-rim) !important;}
+  .leaflet-bar a{background:var(--glass-sheen), var(--glass-body-strong) !important;color:var(--text) !important;
+    border-bottom:1px solid var(--stroke-soft) !important;width:34px;height:34px;line-height:34px;
+    -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);}
+  .leaflet-bar a:hover{background:rgba(48,48,54,.9) !important;}
   .leaflet-bar a.leaflet-disabled{color:var(--text-3) !important;}
-  .leaflet-control-layers{background:rgba(20,20,23,.85) !important;color:var(--text) !important;
-    border:1px solid var(--stroke) !important;border-radius:12px !important;
-    -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
-    box-shadow:0 8px 24px rgba(0,0,0,.45) !important;}
-  .leaflet-control-layers-expanded{padding:10px 14px;font-size:13px;}
-  .leaflet-control-layers-toggle{filter:invert(1);}
+  .locateBtn{display:flex !important;align-items:center;justify-content:center;}
+  .locateBtn svg{display:block;}
+  .leaflet-touch .leaflet-bar a{width:34px;height:34px;line-height:34px;}
+  .leaflet-control-layers{background:var(--glass-sheen), var(--glass-body-strong) !important;color:var(--text) !important;
+    border:1px solid var(--glass-edge) !important;border-radius:16px !important;
+    -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+    box-shadow:0 8px 24px rgba(0,0,0,.45), var(--glass-rim) !important;overflow:hidden;}
+  .leaflet-control-layers-toggle{width:40px;height:40px;background-size:20px 20px;filter:invert(1);}
+  .leaflet-control-layers-expanded{padding:8px;min-width:160px;}
+  .leaflet-control-layers-list::before{content:'Stil hartă';display:block;
+    font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--text-3);padding:3px 12px 8px;}
+  .leaflet-control-layers-base{display:flex;flex-direction:column;gap:3px;}
+  .leaflet-control-layers-base label{margin:0;cursor:pointer;}
+  .leaflet-control-layers-base label>span{display:flex;align-items:center;gap:8px;
+    padding:9px 12px;border-radius:11px;font-size:13px;font-weight:500;color:var(--text-2);white-space:nowrap;}
+  .leaflet-control-layers-base label:hover>span{background:var(--glass-2);color:var(--text);}
+  .leaflet-control-layers-base label:has(input:checked)>span{
+    background:linear-gradient(180deg,#FFB43D,var(--accent));color:#140D00;font-weight:600;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.4);}
+  .leaflet-control-layers-selector{position:absolute;opacity:0;pointer-events:none;width:0;height:0;}
+  .leaflet-control-layers-separator{display:none;}
+  @media (prefers-reduced-motion: no-preference){
+    .leaflet-control-layers-base label>span{transition:background-color .15s ease,color .15s ease;}
+  }
   .leaflet-control-attribution{background:rgba(0,0,0,.55) !important;color:rgba(245,245,247,.4) !important;
     font-size:10px !important;}
   .leaflet-control-attribution a{color:rgba(245,245,247,.6) !important;}
@@ -223,21 +260,21 @@
 
   /* notice shown when tile images are blocked (e.g. sandboxed previews) */
   #tileNotice{position:absolute;right:16px;bottom:16px;left:auto;z-index:1100;max-width:400px;
-    background:rgba(20,20,23,.9);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);
-    border:1px solid var(--stroke);border-radius:16px;box-shadow:0 16px 44px rgba(0,0,0,.6);
+    background:var(--glass-sheen), var(--glass-body-strong);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+    border:1px solid var(--glass-edge);border-radius:18px;box-shadow:0 16px 44px rgba(0,0,0,.6), var(--glass-rim);
     padding:12px 14px;font-size:12.5px;line-height:1.55;color:var(--text-2);
     display:flex;gap:12px;align-items:flex-start;}
   #tileNotice .ghostBtn{flex:0 0 auto;margin-top:-2px;}
 
   /* ---------- donation modal ---------- */
   #donateOverlay{position:fixed;inset:0;z-index:3000;display:flex;align-items:center;justify-content:center;padding:20px;
-    background:rgba(0,0,0,.62);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);}
-  #donateCard{position:relative;width:100%;max-width:396px;
-    background:rgba(22,22,25,.92);-webkit-backdrop-filter:blur(30px) saturate(1.4);backdrop-filter:blur(30px) saturate(1.4);
-    border:1px solid var(--stroke);border-radius:var(--r-lg);box-shadow:0 30px 80px rgba(0,0,0,.65);
+    background:rgba(0,0,0,.55);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);}
+  #donateCard{position:relative;width:100%;max-width:396px;max-height:calc(100dvh - 40px);overflow-y:auto;
+    background:var(--glass-sheen), var(--glass-body-strong);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+    border:1px solid var(--glass-edge);border-radius:var(--r-lg);box-shadow:0 30px 80px rgba(0,0,0,.65), var(--glass-rim);
     padding:28px 26px 22px;text-align:center;}
   #donateCard::before{content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;
-    background:radial-gradient(360px 180px at 50% -40px, rgba(255,159,10,.18), transparent 70%);}
+    background:radial-gradient(360px 180px at 50% -40px, rgba(255,159,10,.2), transparent 72%);}
   .donateX{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--text-3);
     font-size:24px;line-height:1;padding:2px 8px;border-radius:8px;}
   .donateX:hover{color:var(--text);background:var(--glass-2);}
@@ -275,24 +312,50 @@
     @keyframes cardPop{from{opacity:0;transform:translateY(12px) scale(.97);}to{opacity:1;transform:none;}}
   }
 
-  /* ---------- small screens: full map on top, panel as bottom sheet ---------- */
+  /* ---------- small screens: full-screen map + glass bottom sheet ---------- */
   @media (max-width:760px){
-    #app{display:flex;flex-direction:column;}
-    #map{position:relative;inset:auto;flex:0 0 46vh;height:46vh;}
-    #panel{position:relative;top:auto;left:auto;bottom:auto;width:auto;flex:1;min-height:0;
-      margin:-20px 10px 0;border-radius:var(--r-lg) var(--r-lg) 0 0;
-      box-shadow:0 -18px 44px rgba(0,0,0,.5);}
-    .hero{padding-top:18px;}
-    #tileNotice{right:12px;left:12px;bottom:12px;max-width:none;}
+    /* map stays full-screen behind everything */
+    #map{position:absolute;inset:0;}
+
+    /* panel becomes a bottom sheet that floats over the map */
+    #panel{top:auto;left:8px;right:8px;bottom:0;width:auto;
+      max-height:62dvh;
+      border-radius:24px 24px 0 0;
+      border-bottom:none;
+      box-shadow:0 -18px 50px rgba(0,0,0,.55), var(--glass-rim);
+      transition:max-height .32s cubic-bezier(.2,.8,.2,1);}
+    body.sheet-min #panel{max-height:calc(158px + env(safe-area-inset-bottom,0px));}
+    #panelScroll{padding-bottom:env(safe-area-inset-bottom,0px);}
+
+    .sheetHandle{display:flex;align-items:center;justify-content:center;gap:8px;
+      width:100%;height:30px;flex:0 0 auto;background:none;border:none;padding:9px 0 3px;
+      color:var(--text-3);font-size:11px;font-weight:600;}
+    .sheetHandle .sheetGrip{width:40px;height:5px;border-radius:3px;background:rgba(255,255,255,.3);}
+
+    .hero{padding:8px 20px 16px;}
+    .sub{font-size:15.5px;}
+    .card,.indexSec{margin-left:14px;margin-right:14px;}
+
+    /* move the bottom-right controls up so the sheet never covers them; drop the scale bar */
+    .leaflet-bottom.leaflet-right{bottom:auto;right:auto;
+      top:calc(env(safe-area-inset-top,0px) + 10px);left:10px;}
+    .leaflet-top.leaflet-right{top:calc(env(safe-area-inset-top,0px) + 10px);right:10px;}
+    .leaflet-control-scale{display:none;}
+
+    #tileNotice{right:12px;left:12px;bottom:auto;top:calc(env(safe-area-inset-top,0px) + 58px);max-width:none;}
+    #donateCard{max-height:calc(100dvh - 32px);}
+  }
+  @media (max-width:760px) and (prefers-reduced-motion: reduce){
+    #panel{transition:none;}
   }
 </style>
 </head>
-<body>
-<div id="donateOverlay" hidden>
+<body class="">
+<div id="donateOverlay" hidden="">
   <div id="donateCard" role="dialog" aria-modal="true" aria-labelledby="donateTitle">
     <button id="donateClose" class="donateX" type="button" aria-label="Închide">×</button>
     <div class="donateBadge">
-      <svg viewBox="0 0 24 24" width="26" height="26" fill="var(--accent)" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="var(--accent)" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
     </div>
     <h2 id="donateTitle">Susține proiectul</h2>
     <p class="donateText">Acest ghid e făcut cu drag și ținut la zi gratuit. Dacă ți-a fost de folos, poți lăsa o donație — orice sumă contează. Mulțumesc!</p>
@@ -308,15 +371,16 @@
   </div>
 </div>
 <div id="app">
-  <div id="map" role="application" aria-label="Harta Bucureștiului"></div>
+  <div id="map" role="application" aria-label="Harta Bucureștiului" tabindex="0"></div>
 
   <aside id="panel">
+    <button class="sheetHandle" id="sheetHandle" type="button" aria-label="Extinde sau restrânge lista"><span class="sheetGrip"></span></button>
     <div id="panelScroll">
       <header class="hero">
-        <div class="notch" id="notchPill"><span class="notchDot"></span><span id="pillCount">0 locuri</span></div>
+        <div class="notch" id="notchPill"><span class="notchDot"></span><span id="pillCount">29 de locuri</span></div>
         <p class="sub">Salut, aici găsești toate magazinele de care ai nevoie ;)</p>
-        <a class="requestBtn" href="mailto:mihaly.david@icloud.com,vlad.alex.posea@gmail.com?subject=Cerere%20magazin%20nou&body=Salut!%20A%C8%99%20vrea%20s%C4%83%20propun%20un%20magazin%20pentru%20hart%C4%83%3A%0A%0ANume%20magazin%3A%20%0Alink%20de%20google%20maps%20cu%20locul%3A%20%0ACe%20vinde%3A%20%0AAlte%20detalii%20(program%2C%20observa%C8%9Bii)%3A%20%0A" aria-label="Fă cerere de magazin prin email">
-          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="m22 6-10 7L2 6"/></svg>
+        <a class="requestBtn" href="mailto:mihaly.david@icloud.com,vlad.alex.posea@gmail.com?subject=Cerere%20magazin%20nou&amp;body=Salut!%20A%C8%99%20vrea%20s%C4%83%20propun%20un%20magazin%20pentru%20hart%C4%83%3A%0A%0ANume%20magazin%3A%20%0Alink%20de%20google%20maps%20cu%20locul%3A%20%0ACe%20vinde%3A%20%0AAlte%20detalii%20(program%2C%20observa%C8%9Bii)%3A%20%0A" aria-label="Fă cerere de magazin prin email">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4z"></path><path d="m22 6-10 7L2 6"></path></svg>
           Fă cerere de magazin
         </a>
       </header>
@@ -324,7 +388,7 @@
       <section class="card editorOnly" id="formCard" aria-labelledby="formTitle">
         <div class="cardHead">
           <h2 id="formTitle">Adaugă un loc</h2>
-          <button id="cancelEdit" class="ghostBtn" type="button" hidden>Anulează</button>
+          <button id="cancelEdit" class="ghostBtn" type="button" hidden="">Anulează</button>
         </div>
 
         <label class="field"><span>Nume</span>
@@ -346,7 +410,8 @@
         </div>
 
         <label class="field"><span>Program <em>· opțional</em></span>
-          <textarea id="fSchedule" rows="2" placeholder="Lun–Vin 09:00–18:00&#10;Sâm 10:00–14:00"></textarea>
+          <textarea id="fSchedule" rows="2" placeholder="Lun–Vin 09:00–18:00
+Sâm 10:00–14:00"></textarea>
         </label>
 
         <label class="field"><span>Detalii <em>· opțional</em></span>
@@ -355,21 +420,21 @@
 
         <div class="field">
           <span class="fieldLabel">Culoarea pinului</span>
-          <div id="swatches" class="swatches" role="group" aria-label="Culoarea pinului"></div>
+          <div id="swatches" class="swatches" role="group" aria-label="Culoarea pinului"><button type="button" class="swatch" style="background: rgb(255, 159, 10);" aria-label="Culoare pin 1" aria-pressed="true"></button><button type="button" class="swatch" style="background: rgb(255, 69, 58);" aria-label="Culoare pin 2" aria-pressed="false"></button><button type="button" class="swatch" style="background: rgb(10, 132, 255);" aria-label="Culoare pin 3" aria-pressed="false"></button><button type="button" class="swatch" style="background: rgb(48, 209, 88);" aria-label="Culoare pin 4" aria-pressed="false"></button><button type="button" class="swatch" style="background: rgb(191, 90, 242);" aria-label="Culoare pin 5" aria-pressed="false"></button><button type="button" class="swatch" style="background: rgb(100, 210, 255);" aria-label="Culoare pin 6" aria-pressed="false"></button></div>
         </div>
 
-        <p id="formError" class="error" hidden></p>
+        <p id="formError" class="error" hidden=""></p>
         <button id="saveBtn" class="primaryBtn" type="button">Adaugă locul</button>
       </section>
 
       <section class="indexSec" aria-labelledby="indexTitle">
         <div class="indexHead">
           <h2 id="indexTitle">Locuri</h2>
-          <span id="count" class="countBadge">0 pe hartă</span>
+          <span id="count" class="countBadge">29 pe hartă</span>
         </div>
-        <ul id="placeList"></ul>
-        <p class="emptyState viewerOnly" id="emptyViewer" hidden>Încă nu e nimic aici — locurile vor apărea după ce autorul hărții le adaugă.</p>
-        <p class="emptyState editorOnly" id="emptyEditor" hidden>Niciun loc încă. Introdu coordonatele mai sus sau apasă „Alege pe hartă” și dă click unde vrei pinul.</p>
+        <ul id="placeList"><li tabindex="0" role="button" aria-label="Arată Shop&amp;Go pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#FF453A" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">Shop&amp;Go</span><span class="liCoords">44.45752, 26.07797</span><span class="liVotes"><b class="vc-ok" data-vshop="msp1o3v74jfxj">1</b>✓<span><b class="vc-no" data-vshop="msp1o3v74jfxj">0</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată Omar si prietenii pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#FF9F0A" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">Omar si prietenii</span><span class="liCoords">44.45228, 26.08006</span><span class="liVotes"><b class="vc-ok" data-vshop="msp1xjysejiw2">4</b>✓<span><b class="vc-no" data-vshop="msp1xjysejiw2">0</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată Tabakos pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#30D158" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">Tabakos</span><span class="liCoords">44.44636, 26.09731</span><span class="liVotes"><b class="vc-ok" data-vshop="msp29vb8cakjq">4</b>✓<span><b class="vc-no" data-vshop="msp29vb8cakjq">0</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată Tutungerie pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#BF5AF2" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">Tutungerie</span><span class="liCoords">44.46537, 26.08809</span><span class="liVotes"><b class="vc-ok" data-vshop="msp2ksv33559s">5</b>✓<span><b class="vc-no" data-vshop="msp2ksv33559s">0</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată Un chiosc mic pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#64D2FF" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">Un chiosc mic</span><span class="liCoords">44.46734, 26.08619</span><span class="liVotes"><b class="vc-ok" data-vshop="msp2tzq1u88js">4</b>✓<span><b class="vc-no" data-vshop="msp2tzq1u88js">0</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată Magazin pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#30D158" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">Magazin</span><span class="liCoords">44.42458, 26.14863</span><span class="liVotes"><b class="vc-ok" data-vshop="msp2z4woqx3j5">1</b>✓<span><b class="vc-no" data-vshop="msp2z4woqx3j5">1</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată Magain fix langa statie pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#FF453A" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">Magain fix langa statie</span><span class="liCoords">44.41426, 26.15219</span><span class="liVotes"><b class="vc-ok" data-vshop="msp32duegeczn">0</b>✓<span><b class="vc-no" data-vshop="msp32duegeczn">0</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată Froo pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#0A84FF" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">Froo</span><span class="liCoords">44.44137, 26.15711</span><span class="liVotes"><b class="vc-ok" data-vshop="msp35n0fs5hdi">0</b>✓<span><b class="vc-no" data-vshop="msp35n0fs5hdi">0</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată Afi 1 pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#FF9F0A" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">Afi 1</span><span class="liCoords">44.43251, 26.05413</span><span class="liVotes"><b class="vc-ok" data-vshop="msp3c04ttqrlv">7</b>✓<span><b class="vc-no" data-vshop="msp3c04ttqrlv">0</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată Afi 2 pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#FF9F0A" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">Afi 2</span><span class="liCoords">44.43358, 26.05414</span><span class="liVotes"><b class="vc-ok" data-vshop="msp47rv35f0lr">3</b>✓<span><b class="vc-no" data-vshop="msp47rv35f0lr">2</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată moisil colt pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#0A84FF" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">moisil colt</span><span class="liCoords">44.42796, 26.04213</span><span class="liVotes"><b class="vc-ok" data-vshop="msq0w5iw6vde7">6</b>✓<span><b class="vc-no" data-vshop="msq0w5iw6vde7">0</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată market taberei/raul doamnei pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#30D158" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">market taberei/raul doamnei</span><span class="liCoords">44.41644, 26.02135</span><span class="liVotes"><b class="vc-ok" data-vshop="msq0zb8ks9gq3">1</b>✓<span><b class="vc-no" data-vshop="msq0zb8ks9gq3">0</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată froo cosbuc pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#30D158" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">froo cosbuc</span><span class="liCoords">44.43892, 26.11543</span><span class="liVotes"><b class="vc-ok" data-vshop="msqmdbk1p3xqa">1</b>✓<span><b class="vc-no" data-vshop="msqmdbk1p3xqa">0</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată mega image dobroesti pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#FF9F0A" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">mega image dobroesti</span><span class="liCoords">44.45537, 26.17800</span><span class="liVotes"><b class="vc-ok" data-vshop="msrnskhpf41we">0</b>✓<span><b class="vc-no" data-vshop="msrnskhpf41we">0</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată Sc Calex Com S.R.L pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#FF9F0A" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">Sc Calex Com S.R.L</span><span class="liCoords">44.45839, 26.16285</span><span class="liVotes"><b class="vc-ok" data-vshop="msrntncraklsj">0</b>✓<span><b class="vc-no" data-vshop="msrntncraklsj">0</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată fitosica pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#FF9F0A" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">fitosica</span><span class="liCoords">44.47174, 26.08104</span><span class="liVotes"><b class="vc-ok" data-vshop="msrnvd4sagn5h">0</b>✓<span><b class="vc-no" data-vshop="msrnvd4sagn5h">0</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată chiosc universitate pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#FF9F0A" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">chiosc universitate</span><span class="liCoords">44.43520, 26.10701</span><span class="liVotes"><b class="vc-ok" data-vshop="msrnww7qxh89c">1</b>✓<span><b class="vc-no" data-vshop="msrnww7qxh89c">1</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată freshama ipotesti pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#FF9F0A" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">freshama ipotesti</span><span class="liCoords">47.63002, 26.27348</span><span class="liVotes"><b class="vc-ok" data-vshop="msrny25e0cjrh">0</b>✓<span><b class="vc-no" data-vshop="msrny25e0cjrh">0</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată non stop zodiac suceava pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#FF9F0A" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">non stop zodiac suceava</span><span class="liCoords">47.63938, 26.25235</span><span class="liVotes"><b class="vc-ok" data-vshop="msrnyyjmudht9">0</b>✓<span><b class="vc-no" data-vshop="msrnyyjmudht9">0</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată minimarket andy bel pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#FF9F0A" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">minimarket andy bel</span><span class="liCoords">44.45792, 26.16487</span><span class="liVotes"><b class="vc-ok" data-vshop="msro0qgxd118f">0</b>✓<span><b class="vc-no" data-vshop="msro0qgxd118f">0</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată Market All for you pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#64D2FF" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">Market All for you</span><span class="liCoords">44.43258, 26.14522</span><span class="liVotes"><b class="vc-ok" data-vshop="msxp593zq4r3y">1</b>✓<span><b class="vc-no" data-vshop="msxp593zq4r3y">0</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată May shop pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#BF5AF2" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">May shop</span><span class="liCoords">44.42478, 26.14880</span><span class="liVotes"><b class="vc-ok" data-vshop="mt6d1wjywq45o">0</b>✓<span><b class="vc-no" data-vshop="mt6d1wjywq45o">0</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată Profi city pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#FF453A" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">Profi city</span><span class="liCoords">44.18078, 28.65250</span><span class="liVotes"><b class="vc-ok" data-vshop="mt6d4edxozsuy">1</b>✓<span><b class="vc-no" data-vshop="mt6d4edxozsuy">0</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată Carrefour uverturii pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#30D158" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">Carrefour uverturii</span><span class="liCoords">44.44479, 26.02444</span><span class="liVotes"><b class="vc-ok" data-vshop="mtlz9r3y0qp7b">1</b>✓<span><b class="vc-no" data-vshop="mtlz9r3y0qp7b">1</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată market Parcul Timisoara pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#FF9F0A" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">market Parcul Timisoara</span><span class="liCoords">44.42768, 26.04444</span><span class="liVotes"><b class="vc-ok" data-vshop="mu1qsa7s44gku">1</b>✓<span><b class="vc-no" data-vshop="mu1qsa7s44gku">0</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată market Plaza pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#0A84FF" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">market Plaza</span><span class="liCoords">44.42718, 26.03563</span><span class="liVotes"><b class="vc-ok" data-vshop="mu1qy4pi797vt">1</b>✓<span><b class="vc-no" data-vshop="mu1qy4pi797vt">0</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată triangolo bar (la sarmale) pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#64D2FF" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">triangolo bar (la sarmale)</span><span class="liCoords">44.41468, 26.02435</span><span class="liVotes"><b class="vc-ok" data-vshop="muhgt40rmq3n3">0</b>✓<span><b class="vc-no" data-vshop="muhgt40rmq3n3">0</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată Dida pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#BF5AF2" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">Dida</span><span class="liCoords">44.43645, 26.02672</span><span class="liVotes"><b class="vc-ok" data-vshop="muhguqwv20yko">0</b>✓<span><b class="vc-no" data-vshop="muhguqwv20yko">0</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li><li tabindex="0" role="button" aria-label="Arată vape shop gorjului pe hartă"><span class="liPin"><svg width="13" height="17" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 2C8.7 2 2 8.7 2 17c0 10.5 15 25 15 25s15-14.5 15-25C32 8.7 25.3 2 17 2z" fill="#30D158" stroke="rgba(255,255,255,.92)" stroke-width="2"></path><circle cx="17" cy="16.5" r="5.2" fill="rgba(255,255,255,.95)"></circle></svg></span><span class="liMain"><span class="liName">vape shop gorjului</span><span class="liCoords">44.43382, 26.02190</span><span class="liVotes"><b class="vc-ok" data-vshop="muhgvv3fyvev8">0</b>✓<span><b class="vc-no" data-vshop="muhgvv3fyvev8">0</b>✗</span></span></span><span class="liActions viewerOnly"><button class="ghostBtn" type="button" data-act="dir">Indicații ↗</button></span><span class="liActions editorOnly"><button class="ghostBtn" type="button" data-act="edit">Editează</button><button class="ghostBtn" type="button" data-act="del">Șterge</button></span></li></ul>
+        <p class="emptyState viewerOnly" id="emptyViewer" hidden="">Încă nu e nimic aici — locurile vor apărea după ce autorul hărții le adaugă.</p>
+        <p class="emptyState editorOnly" id="emptyEditor" hidden="">Niciun loc încă. Introdu coordonatele mai sus sau apasă „Alege pe hartă” și dă click unde vrei pinul.</p>
       </section>
 
       <footer class="colophon">Hartă de bază © OpenStreetMap contributors · © CARTO</footer>
@@ -378,13 +443,13 @@
     <div id="editorBar" class="editorOnly">
       <div class="ebTop">
         <span class="ebTag">Editor</span>
-        <span id="dirtyNote">Modificările rămân doar în această pagină până descarci fișierul actualizat.</span>
+        <span id="dirtyNote">Modificări nesalvate — descarcă fișierul și înlocuiește-l pe host ca să publici.</span>
         <button id="exitEd" class="ghostBtn" type="button">Ieși</button>
       </div>
-      <button id="downloadBtn" class="accentBtn" type="button">Descarcă harta actualizată</button>
+      <button id="downloadBtn" class="accentBtn" type="button" disabled="">Descarcă harta actualizată</button>
       <details id="jsonBox">
         <summary>Datele locurilor (backup JSON)</summary>
-        <textarea id="jsonArea" rows="6" readonly spellcheck="false"></textarea>
+        <textarea id="jsonArea" rows="6" readonly="" spellcheck="false"></textarea>
       </details>
     </div>
   </aside>
@@ -651,6 +716,36 @@
     "details": "vinde alcool (altcv nu s-a incercat)",
     "color": "#0A84FF",
     "createdAt": 1789420808791
+  },
+  {
+    "id": "muhgt40rmq3n3",
+    "name": "triangolo bar (la sarmale)",
+    "lat": 44.414676,
+    "lng": 26.024348,
+    "schedule": "",
+    "details": "vinde alcool. iti mai da cut off daca esti f beat",
+    "color": "#64D2FF",
+    "createdAt": 1790371237275
+  },
+  {
+    "id": "muhguqwv20yko",
+    "name": "Dida",
+    "lat": 44.436454,
+    "lng": 26.026718,
+    "schedule": "",
+    "details": "vinde alcool. te intrb daca ai 18 ani si doar zici ca ai si iti da",
+    "color": "#BF5AF2",
+    "createdAt": 1790371313599
+  },
+  {
+    "id": "muhgvv3fyvev8",
+    "name": "vape shop gorjului",
+    "lat": 44.433818,
+    "lng": 26.021896,
+    "schedule": "",
+    "details": "",
+    "color": "#30D158",
+    "createdAt": 1790371365675
   }
 ]
 </script>
@@ -658,6 +753,9 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<link href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css" rel="stylesheet">
+<script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.4/leaflet-maplibre-gl.js"></script>
 <script>
 (function(){
   'use strict';
@@ -722,25 +820,65 @@
 
   /* ---------- map ---------- */
   var map = L.map('map', { zoomControl:false }).setView([44.4323, 26.1004], 13);
-  var carto = { subdomains:'abcd', maxZoom:20,
-    attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>' };
-  var darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', carto);
-  var lightLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', carto);
-  var detailLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', carto);
-  darkLayer.addTo(map);
-  L.control.layers({ 'Întunecată':darkLayer, 'Luminoasă':lightLayer, 'Detaliată':detailLayer }, null, { position:'topright' }).addTo(map);
+  var OFM = 'https://tiles.openfreemap.org/styles/';
+  var ofmAttr = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://openfreemap.org">OpenFreeMap</a>';
+  var osmAttr = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+  function hasWebGL(){
+    try{ var c = document.createElement('canvas');
+      return !!(window.WebGLRenderingContext && (c.getContext('webgl') || c.getContext('experimental-webgl'))); }
+    catch(e){ return false; }
+  }
+  var useGL = (typeof L.maplibreGL === 'function') && hasWebGL();
+
+  var darkLayer, lightLayer, detailLayer, overlays;
+  if (useGL){
+    /* OpenFreeMap vector tiles — keyless, no request limits, real dark theme */
+    darkLayer   = L.maplibreGL({ style: OFM + 'dark' });
+    lightLayer  = L.maplibreGL({ style: OFM + 'positron' });
+    detailLayer = L.maplibreGL({ style: OFM + 'liberty' });
+    overlays = { 'Întunecată':darkLayer, 'Luminoasă':lightLayer, 'Detaliată':detailLayer };
+  } else {
+    /* fallback if WebGL/MapLibre is unavailable: OSM raster, dark option via CSS filter */
+    darkLayer  = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:osmAttr, className:'osm-dark' });
+    lightLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:osmAttr });
+    overlays = { 'Întunecată':darkLayer, 'Luminoasă':lightLayer };
+  }
+  var defaultLayer = useGL ? detailLayer : lightLayer;
+  defaultLayer.addTo(map);
+  map.attributionControl.addAttribution(useGL ? ofmAttr : osmAttr);
+  L.control.layers(overlays, null, { position:'topright' }).addTo(map);
   L.control.zoom({ position:'bottomright' }).addTo(map);
+
+  /* "locația mea" button — a tap reliably triggers the permission prompt */
+  var LocateControl = L.Control.extend({
+    options: { position: 'bottomright' },
+    onAdd: function(){
+      var c = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+      var a = L.DomUtil.create('a', 'locateBtn', c);
+      a.href = '#'; a.title = 'Arată locația mea'; a.setAttribute('role','button');
+      a.setAttribute('aria-label','Arată locația mea');
+      a.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg>';
+      L.DomEvent.on(a, 'click', function(e){ L.DomEvent.stop(e); locateMe(true); });
+      return c;
+    }
+  });
+  map.addControl(new LocateControl());
   L.control.scale({ imperial:false, position:'bottomright' }).addTo(map);
   var markerLayer = L.layerGroup().addTo(map);
 
-  /* notice if tile images are blocked (sandboxed previews block outside images) */
+  /* keep the map filling its container as layout/fonts settle */
+  map.whenReady(function(){ setTimeout(function(){ map.invalidateSize(); }, 200); });
+  window.addEventListener('load', function(){ map.invalidateSize(); });
+
+  /* only the raster fallback can raise tile errors; warn if even OSM won't load */
   function onTileError(){
     tileErrors++;
-    if (tileErrors === 4 && !$('tileNotice')){
+    if (tileErrors >= 10 && !$('tileNotice')){
       var n = document.createElement('div');
       n.id = 'tileNotice';
-      n.innerHTML = '<span>Harta de fundal nu se poate încărca în această previzualizare — mediul blochează imaginile externe. ' +
-                    'Deschide fișierul direct în browser sau publică-l online și vor apărea străzile, clădirile și parcurile.</span>';
+      n.innerHTML = '<span>Harta de fundal nu s-a putut încărca — verifică conexiunea la internet. ' +
+                    '(În previzualizarea din aplicație acest lucru e normal; pe site-ul publicat harta apare.)</span>';
       var b = document.createElement('button');
       b.type = 'button'; b.className = 'ghostBtn'; b.textContent = 'Închide';
       b.addEventListener('click', function(){ n.remove(); });
@@ -748,9 +886,7 @@
       el.mapDiv.appendChild(n);
     }
   }
-  darkLayer.on('tileerror', onTileError);
-  lightLayer.on('tileerror', onTileError);
-  detailLayer.on('tileerror', onTileError);
+  if (!useGL){ darkLayer.on('tileerror', onTileError); lightLayer.on('tileerror', onTileError); }
 
   function pinSVG(color, w, h){
     return '<svg width="' + w + '" height="' + h + '" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg">' +
@@ -1154,6 +1290,13 @@
   /* recolour vote counts/buttons whenever a popup opens */
   map.on('popupopen', applyVoteCounts);
 
+  /* mobile bottom-sheet: tap the handle to collapse/expand, then refit the map */
+  var sheetHandle = $('sheetHandle');
+  if (sheetHandle) sheetHandle.addEventListener('click', function(){
+    document.body.classList.toggle('sheet-min');
+    setTimeout(function(){ map.invalidateSize(); }, 340);
+  });
+
   /* connect to the shared vote database (silently no-ops if it can't load) */
   try{
     if (window.firebase && firebase.initializeApp){
@@ -1162,7 +1305,7 @@
       db.ref('votes').on('value', function(snap){
         voteCounts = snap.val() || {};
         applyVoteCounts();
-      });
+      }, function(){ /* permisiune expirată / offline — lăsăm voturile așa cum sunt */ });
     }
   }catch(e){ db = null; }
 
@@ -1238,7 +1381,7 @@
   function setupDonate(){
     var ov = $('donateOverlay');
     if (!ov) return null;
-    function hide(){ ov.setAttribute('hidden',''); }
+    function hide(){ ov.setAttribute('hidden',''); setTimeout(function(){ map.invalidateSize(); }, 60); }
     function show(){ ov.removeAttribute('hidden'); }
     var close = $('donateClose'), later = $('donateLater'), copy = $('ibanCopy');
     if (close) close.addEventListener('click', hide);
@@ -1292,18 +1435,33 @@
     var b = L.latLngBounds(places.map(function(p){ return [p.lat, p.lng]; }));
     map.fitBounds(b.pad(0.25), { maxZoom: 15, animate: false });
   }
-  function locateAndFocus(){
-    focusRomania(); /* sensible default shown while we wait for permission */
-    if (!navigator.geolocation) return;
+  function placeUser(pos){
+    var lat = pos.coords.latitude, lng = pos.coords.longitude, acc = pos.coords.accuracy;
+    showUserLocation(lat, lng, acc);
+    map.setView([lat, lng], 14); /* focus on the user's city */
+  }
+  function locateMe(manual){
+    if (!navigator.geolocation){
+      if (manual) alert('Browserul acesta nu oferă locația.'); else focusRomania();
+      return;
+    }
     navigator.geolocation.getCurrentPosition(
-      function(pos){
-        var lat = pos.coords.latitude, lng = pos.coords.longitude, acc = pos.coords.accuracy;
-        showUserLocation(lat, lng, acc);
-        map.setView([lat, lng], 13); /* focus on the user's city */
+      placeUser,
+      function(err){
+        if (manual){
+          alert(err && err.code === 1
+            ? 'Locația este blocată pentru acest site. Activează permisiunea de locație din setările browserului, apoi apasă din nou butonul.'
+            : 'Nu am putut obține locația. Mai încearcă o dată.');
+        } else {
+          focusRomania();   /* denied or failed on load → show whole country */
+        }
       },
-      function(){ focusRomania(); },              /* denied or failed → whole country */
-      { enableHighAccuracy: false, timeout: 9000, maximumAge: 300000 }
+      { enableHighAccuracy: !!manual, timeout: 9000, maximumAge: manual ? 0 : 300000 }
     );
+  }
+  function locateAndFocus(){
+    focusRomania();   /* sensible default while we wait for the permission answer */
+    locateMe(false);
   }
 
   /* ---------- init ---------- */
@@ -1318,5 +1476,6 @@
   }
 })();
 </script>
-</body>
-</html>
+
+
+</body></html>
