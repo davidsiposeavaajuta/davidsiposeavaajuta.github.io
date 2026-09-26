@@ -268,52 +268,6 @@
     display:flex;gap:12px;align-items:flex-start;}
   #tileNotice .ghostBtn{flex:0 0 auto;margin-top:-2px;}
 
-  /* ---------- donation modal ---------- */
-  #donateOverlay{position:fixed;inset:0;z-index:3000;display:flex;align-items:center;justify-content:center;padding:20px;
-    background:rgba(0,0,0,.55);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);}
-  #donateCard{position:relative;width:100%;max-width:396px;max-height:calc(100dvh - 40px);overflow-y:auto;
-    background:var(--glass-sheen), var(--glass-body-strong);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
-    border:1px solid var(--glass-edge);border-radius:var(--r-lg);box-shadow:0 30px 80px rgba(0,0,0,.65), var(--glass-rim);
-    padding:28px 26px 22px;text-align:center;}
-  #donateCard::before{content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;
-    background:radial-gradient(360px 180px at 50% -40px, rgba(255,159,10,.2), transparent 72%);}
-  .donateX{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--text-3);
-    font-size:24px;line-height:1;padding:2px 8px;border-radius:8px;}
-  .donateX:hover{color:var(--text);background:var(--glass-2);}
-  .donateBadge{position:relative;width:56px;height:56px;margin:4px auto 14px;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    background:var(--accent-soft);box-shadow:0 0 0 1px rgba(255,159,10,.35);}
-  #donateCard h2{position:relative;font-size:21px;font-weight:700;letter-spacing:-0.02em;}
-  .donateText{position:relative;margin:8px auto 20px;max-width:322px;font-size:13.5px;line-height:1.55;color:var(--text-2);}
-  .donateMethod{position:relative;text-align:left;margin-bottom:6px;}
-  .donateLabel{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-3);margin-bottom:6px;}
-  .ibanRow{display:flex;align-items:stretch;gap:8px;}
-  #ibanValue{flex:1;min-width:0;font-family:var(--mono);font-size:12.5px;color:var(--text);
-    background:rgba(255,255,255,.06);border:1px solid var(--stroke);border-radius:12px;
-    padding:11px 12px;display:flex;align-items:center;overflow-x:auto;white-space:nowrap;}
-  .copyBtn{flex:0 0 auto;background:rgba(255,255,255,.1);color:var(--text);border:1px solid var(--stroke);
-    border-radius:12px;padding:0 16px;font-size:13px;font-weight:600;}
-  .copyBtn:hover{background:rgba(255,255,255,.16);}
-  .copyBtn.copied{background:var(--accent);color:#140D00;border-color:var(--accent);}
-  .revolutBtn{position:relative;display:block;margin-top:16px;background:var(--accent);color:#140D00;
-    border-radius:999px;padding:12px 14px;font-size:14px;font-weight:600;text-decoration:none;
-    box-shadow:0 4px 22px rgba(255,159,10,.25);}
-  .revolutBtn:hover{filter:brightness(1.08);}
-  .donateLater{position:relative;margin-top:14px;background:none;border:none;color:var(--text-2);font-size:12.5px;
-    text-decoration:underline;text-underline-offset:3px;}
-  .donateLater:hover{color:var(--text);}
-
-  @media (prefers-reduced-motion: no-preference){
-    .primaryBtn,.accentBtn,.lineBtn,.ghostBtn,.swatch,#placeList li,input,textarea{
-      transition:background-color .16s ease,color .16s ease,box-shadow .16s ease,border-color .16s ease,filter .16s ease;}
-    #panel{animation:panelIn .5s cubic-bezier(.2,.8,.2,1) both;}
-    @keyframes panelIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
-    #donateOverlay:not([hidden]){animation:ovFade .25s ease both;}
-    #donateCard{animation:cardPop .35s cubic-bezier(.2,.8,.2,1) both;}
-    @keyframes ovFade{from{opacity:0;}to{opacity:1;}}
-    @keyframes cardPop{from{opacity:0;transform:translateY(12px) scale(.97);}to{opacity:1;transform:none;}}
-  }
-
   /* ---------- touch devices: bigger tap targets in popups ---------- */
   @media (pointer:coarse){
     .leaflet-container a.leaflet-popup-close-button{width:36px;height:36px;font-size:22px;line-height:36px;top:2px;right:2px;}
